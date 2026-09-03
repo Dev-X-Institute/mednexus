@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T07:30:00Z",
+    "hospital": "MedNexus General Hospital"
+  },
+  "entries": [
+    {
+      "id": "BB-A+",
+      "group": "A+",
+      "unit": 24,
+      "capacity": 40
+    },
+    {
+      "id": "BB-A-",
+      "group": "A-",
+      "unit": 6,
+      "capacity": 20
+    },
+    {
+      "id": "BB-B+",
+      "group": "B+",
+      "unit": 31,
+      "capacity": 40
+    },
+    {
+      "id": "BB-B-",
+      "group": "B-",
+      "unit": 9,
+      "capacity": 20
+    },
+    {
+      "id": "BB-O+",
+      "group": "O+",
+      "unit": 36,
+      "capacity": 50
+    },
+    {
+      "id": "BB-O-",
+      "group": "O-",
+      "unit": 11,
+      "capacity": 25
+    },
+    {
+      "id": "BB-AB+",
+      "group": "AB+",
+      "unit": 7,
+      "capacity": 15
+    },
+    {
+      "id": "BB-AB-",
+      "group": "AB-",
+      "unit": 3,
+      "capacity": 10
+    }
+  ]
+}

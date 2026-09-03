@@ -1,51 +1,21 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/theme";
+import { FloatingTabBar } from "@/components/tab-bar";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: colors.tabActive,
-        tabBarInactiveTintColor: colors.tabInactive,
-        tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-        headerStyle: {
-          backgroundColor: colors.primary,
-        },
-        headerTintColor: "#FFFFFF",
-        headerTitleStyle: {
-          fontWeight: "600",
-        },
+        headerShown: false,
+        sceneStyle: { backgroundColor: Colors.light.background },
       }}
     >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="clinical-memory"
-        options={{
-          title: "Clinical Memory",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="medkit-outline" size={size} color={color} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Tabs.Screen name="memory" options={{ title: "Memory" }} />
+      <Tabs.Screen name="assistant" options={{ title: "Assistant" }} />
+      <Tabs.Screen name="analytics" options={{ title: "Analytics" }} />
+      <Tabs.Screen name="more" options={{ title: "More" }} />
     </Tabs>
   );
 }

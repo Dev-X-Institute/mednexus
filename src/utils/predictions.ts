@@ -1,19 +1,7 @@
-export interface DailyAdmissionData {
-  date: string;
-  admissions: number;
-  discharges: number;
-  occupancy: number;
-}
+import type { DailyAdmissionData } from "@/utils/types";
 
-export interface MedicineStock {
-  id: string;
-  name: string;
-  category: string;
-  currentStock: number;
-  unit: string;
-  monthlyUsageHistory: number[];
-  reorderPoint: number;
-}
+// Re-export shared domain types so existing imports from this module keep working.
+export type { DailyAdmissionData, MedicineStock } from "@/utils/types";
 
 /**
  * Simple linear regression using least squares.
@@ -39,7 +27,8 @@ export function linearRegression(data: number[]): {
     sumX2 += i * i;
   }
 
-  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const denom = n * sumX2 - sumX * sumX;
+  const slope = denom === 0 ? 0 : (n * sumXY - sumX * sumY) / denom;
   const intercept = (sumY - slope * sumX) / n;
 
   return {
@@ -57,11 +46,12 @@ export function predictOccupancy(
   dailyData: DailyAdmissionData[],
   hoursAhead: number
 ): number {
+  if (dailyData.length === 0) return 0;
   const occupancies = dailyData.map((d) => d.occupancy);
   const reg = linearRegression(occupancies);
   const daysAhead = hoursAhead / 24;
   const predicted = reg.predict(occupancies.length - 1 + daysAhead);
-  return Math.round(Math.max(0, Math.min(200, predicted)));
+  return Math.round(Math.max(0, Math.min(TOTAL_BEDS, predicted)));
 }
 
 /**
@@ -99,3 +89,53 @@ export const STATUS_COLORS = {
   warning: { bg: "#FFFBEB", text: "#B45309", dot: "#D97706" },
   adequate: { bg: "#F0FDF4", text: "#15803D", dot: "#16A34A" },
 } as const;
+
+export const TOTAL_BEDS = 200;
+
+/**
+ * Format an occupancy/capacity figure as a whole percentage string (e.g. "87%").
+ * Clamps to 0-100 and rounds to no decimals.
+ */
+export function formatCapacity(value: number): string {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  return `${clamped}%`;
+}
+
+/**
+ * Convert an absolute occupancy count into a whole percentage of total beds.
+ */
+export function capacityPercent(occupancy: number): number {
+  return Math.round((occupancy / TOTAL_BEDS) * 100);
+}
+
+/**
+ * Compare the first and last values of a series to infer a trend.
+ * last > first => "up", last < first => "down", otherwise "flat".
+ */
+export function trendDirection(values: number[]): "up" | "down" | "flat" {
+  if (values.length < 2) return "flat";
+  const first = values[0];
+  const last = values[values.length - 1];
+  if (last > first) return "up";
+  if (last < first) return "down";
+  return "flat";
+}
+
+/**
+ * Staffing coverage as a whole percentage of on-duty staff vs shift target.
+ */
+export function staffingRatio(onDuty: number, shiftTarget: number): number {
+  if (shiftTarget <= 0) return 0;
+  return Math.round((onDuty / shiftTarget) * 100);
+}
+
+/**
+ * Confidence grade: high (>=0.8), medium (>=0.6), low (<0.6).
+ */
+export function confidenceGrade(
+  confidence: number
+): "high" | "medium" | "low" {
+  if (confidence >= 0.8) return "high";
+  if (confidence >= 0.6) return "medium";
+  return "low";
+}

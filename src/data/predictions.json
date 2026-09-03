@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-03T08:00:00Z",
+    "confidenceLabel": "Moderate-High Confidence"
+  },
+  "predictions": [
+    {
+      "id": "PRED-001",
+      "title": "Bed demand",
+      "value": "189 beds",
+      "delta": "+9 vs today",
+      "direction": "up",
+      "over": "next 24h",
+      "confidence": 0.86,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-002",
+      "title": "ER admissions",
+      "value": "52 visits",
+      "delta": "+7 vs average",
+      "direction": "up",
+      "over": "next 24h",
+      "confidence": 0.78,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-003",
+      "title": "ICU load",
+      "value": "23 beds",
+      "delta": "-2 vs today",
+      "direction": "down",
+      "over": "next 24h",
+      "confidence": 0.81,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-004",
+      "title": "Pharmacy stock",
+      "value": "Adequate",
+      "delta": "3 items flagged",
+      "direction": "flat",
+      "over": "next 48h",
+      "confidence": 0.72,
+      "period": "48 hours"
+    }
+  ]
+}

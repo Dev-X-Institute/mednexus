@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "date": "2026-09-03",
+    "hospital": "MedNexus General Hospital"
+  },
+  "slots": [
+    {
+      "id": "TH-01",
+      "theatre": "Theatre 1",
+      "procedure": "Laparoscopic Cholecystectomy",
+      "surgeon": "Dr. Grace Mensah",
+      "time": "08:00",
+      "durationMin": 90,
+      "status": "in-progress"
+    },
+    {
+      "id": "TH-02",
+      "theatre": "Theatre 2",
+      "procedure": "Cemented Hemiarthroplasty",
+      "surgeon": "Dr. Nathan Brooks",
+      "time": "08:30",
+      "durationMin": 120,
+      "status": "scheduled"
+    },
+    {
+      "id": "TH-03",
+      "theatre": "Theatre 3",
+      "procedure": "Emergency Appendectomy",
+      "surgeon": "Dr. Priya Sharma",
+      "time": "09:15",
+      "durationMin": 75,
+      "status": "delayed"
+    },
+    {
+      "id": "TH-04",
+      "theatre": "Theatre 1",
+      "procedure": "Inguinal Hernia Repair",
+      "surgeon": "Dr. James Okafor",
+      "time": "11:00",
+      "durationMin": 80,
+      "status": "scheduled"
+    },
+    {
+      "id": "TH-05",
+      "theatre": "Theatre 4",
+      "procedure": "Cataract Extraction with IOL",
+      "surgeon": "Dr. Rachel Nguyen",
+      "time": "13:30",
+      "durationMin": 60,
+      "status": "scheduled"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T06:00:00Z",
+    "shift": "morning"
+  },
+  "staff": [
+    {
+      "id": "STF-001",
+      "name": "Dr. Marcus Chen",
+      "role": "Consultant",
+      "department": "Cardiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.9,
+      "avatarColor": "#2563EB"
+    },
+    {
+      "id": "STF-002",
+      "name": "Dr. Priya Sharma",
+      "role": "Resident",
+      "department": "Cardiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.8,
+      "avatarColor": "#7C3AED"
+    },
+    {
+      "id": "STF-003",
+      "name": "Nurse Elena Rossi",
+      "role": "Charge Nurse",
+      "department": "ER",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.95,
+      "avatarColor": "#DC2626"
+    },
+    {
+      "id": "STF-004",
+      "name": "Dr. James Okafor",
+      "role": "Consultant",
+      "department": "ER",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#059669"
+    },
+    {
+      "id": "STF-005",
+      "name": "Nurse Aisha Bello",
+      "role": "Charge Nurse",
+      "department": "ICU",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.85,
+      "avatarColor": "#D97706"
+    },
+    {
+      "id": "STF-006",
+      "name": "Dr. Henrik Larsen",
+      "role": "Consultant",
+      "department": "ICU",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.75,
+      "avatarColor": "#0891B2"
+    },
+    {
+      "id": "STF-007",
+      "name": "Pharmacist Sofia Duarte",
+      "role": "Pharmacist",
+      "department": "Pharmacy",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#9333EA"
+    },
+    {
+      "id": "STF-008",
+      "name": "Pharmacist Daniel Kim",
+      "role": "Pharmacist",
+      "department": "Pharmacy",
+      "shift": "afternoon",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#4F46E5"
+    },
+    {
+      "id": "STF-009",
+      "name": "Dr. Rachel Nguyen",
+      "role": "Consultant",
+      "department": "Radiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.9,
+      "avatarColor": "#0EA5E9"
+    },
+    {
+      "id": "STF-010",
+      "name": "Tech Omar Haddad",
+      "role": "Radiology Tech",
+      "department": "Radiology",
+      "shift": "night",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#16A34A"
+    },
+    {
+      "id": "STF-011",
+      "name": "Dr. Grace Mensah",
+      "role": "Consultant",
+      "department": "Surgery",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.7,
+      "avatarColor": "#DB2777"
+    },
+    {
+      "id": "STF-012",
+      "name": "Scrub Nurse Liam Foley",
+      "role": "Scrub Nurse",
+      "department": "Surgery",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.8,
+      "avatarColor": "#7C3AED"
+    },
+    {
+      "id": "STF-013",
+      "name": "Lab Supervisor Camila Reyes",
+      "role": "Lab Supervisor",
+      "department": "Lab",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#F59E0B"
+    },
+    {
+      "id": "STF-014",
+      "name": "Dr. Nathan Brooks",
+      "role": "Resident",
+      "department": "ICU",
+      "shift": "night",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#EF4444"
+    }
+  ]
+}

@@ -1,424 +1,526 @@
-import { useMemo, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-} from "react-native";
+import { useMemo, useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LineChart } from "react-native-gifted-charts";
-import { useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Colors, Spacing } from "@/constants/theme";
-import { Skeleton } from "@/components/skeleton";
-import admissionsData from "@/data/admissions.json";
-import medicineData from "@/data/medicineStock.json";
+import { Colors, Radii, Spacing } from "@/constants/theme";
+import { useSession } from "@/context/session";
 import {
-  predictOccupancy,
-  daysUntilStockout,
-  stockStatus,
-  STATUS_COLORS,
-  avgDailyUsage,
-} from "@/utils/predictions";
+  Card,
+  SectionHeader,
+  RingGauge,
+  MetricCard,
+  GradientButton,
+  Badge,
+  ProgressBar,
+  StatTile,
+  Sparkline,
+} from "@/components/ui";
+import admissionsData from "@/data/admissions.json";
+import bloodBankData from "@/data/bloodBank.json";
+import staffData from "@/data/staff.json";
+import theatreData from "@/data/theatreSchedule.json";
+import recommendationsData from "@/data/resourceRecommendations.json";
+import { capacityPercent, formatCapacity, trendDirection } from "@/utils/predictions";
+import { getPredictions, MODE_LABELS, type DemoMode } from "@/utils/predictions-source";
 
-const TOTAL_BEDS = 200;
-const GREEN = "#15803D";
-const RED = "#DC2626";
-const WARNING = "#B45309";
+const c = Colors.dark;
 
 export default function DashboardScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const dark = colorScheme === "dark";
-  const { width: screenWidth } = useWindowDimensions();
-  const chartWidth = screenWidth - 64;
+  const { session } = useSession();
 
-  const [loading, setLoading] = useState(true);
+  const daily = admissionsData.dailyData;
+  const last = daily[daily.length - 1];
+  const occupancyPct = capacityPercent(last.occupancy);
+  const icuPct = Math.round((last.icuOccupancy / 30) * 100);
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 900);
-    return () => clearTimeout(t);
-  }, []);
+  const occupancySeries = daily.map((d) => d.occupancy);
+  const erSeries = daily.map((d) => d.emergencyVisits);
 
-  const dailyData = admissionsData.dailyData;
-  const currentOccupancy = dailyData[dailyData.length - 1].occupancy;
-  const predicted48h = useMemo(() => predictOccupancy(dailyData, 48), [dailyData]);
-  const predictionDelta = predicted48h - currentOccupancy;
+  const [mode, setMode] = useState<DemoMode>("demo");
+  const predictions = getPredictions(mode, daily);
 
-  const chartData = useMemo(
+  const bloodReserve = useMemo(
     () =>
-      dailyData.map((d) => ({
-        value: d.occupancy,
-        label: d.date.slice(8),
-        dataPointText: String(d.occupancy),
+      bloodBankData.entries.map((e) => ({
+        ...e,
+        pct: Math.round((e.unit / e.capacity) * 100),
       })),
-    [dailyData]
-  );
-
-  const icuOccupancy = dailyData[dailyData.length - 1].icuOccupancy;
-  const emergencyVisits = dailyData[dailyData.length - 1].emergencyVisits;
-  const avgOccupancy = Math.round(
-    dailyData.reduce((s, d) => s + d.occupancy, 0) / dailyData.length
-  );
-  const utilizationPct = Math.round((currentOccupancy / TOTAL_BEDS) * 100);
-
-  const medicines = useMemo(
-    () =>
-      medicineData.medicines
-        .map((m) => ({
-          ...m,
-          daysLeft: daysUntilStockout(m.currentStock, m.monthlyUsageHistory),
-          dailyUse: Math.round(avgDailyUsage(m.monthlyUsageHistory) * 10) / 10,
-        }))
-        .sort((a, b) => a.daysLeft - b.daysLeft),
     []
   );
 
-  const occupancyColor =
-    utilizationPct >= 90 ? RED : utilizationPct >= 75 ? WARNING : colors.primary;
+  const onDuty = staffData.staff.filter((s) => s.onDuty);
+  const staffByDept: Record<string, number> = {};
+  for (const s of onDuty) staffByDept[s.department] = (staffByDept[s.department] ?? 0) + 1;
+
+  const availability = onDuty.slice(0, 5);
+
+  const [recommendations, setRecommendations] = useState(
+    recommendationsData.recommendations
+  );
+
+  const statusToneFor = (v: number) =>
+    v >= 85 ? "critical" : v >= 60 ? "warning" : "success";
+
+  const erTrend = trendDirection(erSeries);
+  const erDeltaTone = erTrend === "flat" ? "neutral" : erTrend;
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* ── OCCUPANCY CARD ── */}
-      {loading ? (
-        <SkeletonCard dark={dark} height={248} />
-      ) : (
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardHeaderLeft}>
-              <Ionicons name="bed-outline" size={16} color={colors.primary} />
-              <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>
-                Bed Occupancy
-              </Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: `${occupancyColor}18` }]}>
-              <Text style={[styles.badgeText, { color: occupancyColor }]}>
-                {utilizationPct}%
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.occupancyRow}>
-            <Text style={[styles.occupancyBig, { color: colors.text }]}>
-              {currentOccupancy}
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Greeting header */}
+        <View style={styles.header}>
+          <View style={styles.greetingBlock}>
+            <Text style={[styles.greeting, { color: c.textSecondary }]}>Good evening,</Text>
+            <Text style={[styles.userName, { color: c.text }]} numberOfLines={1}>
+              {session?.userName ?? "Daniel Chen"}
             </Text>
-            <Text style={[styles.occupancyDenom, { color: colors.textSecondary }]}>
-              /{TOTAL_BEDS} beds
+            <Text style={[styles.hospital, { color: c.textMuted }]} numberOfLines={1}>
+              {session?.hospital ?? "St. Meridian General"}
             </Text>
           </View>
+          <View style={styles.headerRight}>
+            <View style={styles.livePill}>
+              <View style={[styles.liveDot, { backgroundColor: c.success }]} />
+              <Text style={[styles.liveText, { color: c.success }]}>LIVE</Text>
+            </View>
+            <TouchableOpacity style={[styles.bellBtn, { backgroundColor: c.card }]}>
+              <Ionicons name="notifications-outline" size={20} color={c.text} />
+              <View style={[styles.bellDot, { backgroundColor: c.critical }]} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          <View style={styles.chartWrap}>
-            <LineChart
-              data={chartData}
-              width={chartWidth}
-              height={120}
-              spacing={chartWidth / 15}
-              color={colors.primary}
-              thickness={2}
-              dataPointsColor={colors.primary}
-              dataPointsRadius={3}
-              textColor={colors.textSecondary}
-              textFontSize={9}
-              hideAxesAndRules
-              xAxisLabelTextStyle={styles.xLabel}
-              curved
-              isAnimated
-              animationDuration={600}
+        {/* Ring gauge card: Beds / ICU / ER queue */}
+        <Card style={styles.gaugeCard}>
+          <SectionHeader
+            title="Capacity Overview"
+            subtitle={`Updated ${formatCapacity(occupancyPct)} · live`}
+            right={<Badge label="Live ops" tone="success" />}
+          />
+          <View style={styles.gaugeRow}>
+            <RingGauge
+              value={occupancyPct}
+              size={112}
+              strokeWidth={9}
+              tone={statusToneFor(occupancyPct) as any}
+              centerLabel={`${occupancyPct}%`}
+              centerCaption="Bed occ"
+            />
+            <RingGauge
+              value={icuPct}
+              size={112}
+              strokeWidth={9}
+              tone={icuPct >= 75 ? ("warning" as any) : ("primary" as any)}
+              centerLabel={`${icuPct}%`}
+              centerCaption="ICU"
+            />
+            <RingGauge
+              value={100}
+              size={112}
+              strokeWidth={9}
+              tone="warning"
+              centerLabel={`${last.emergencyVisits}`}
+              centerCaption="ER queue"
             />
           </View>
 
-          <View style={styles.statsRow}>
-            <View style={styles.statBlock}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                48h forecast
-              </Text>
-              <View style={styles.forecastRow}>
-                <Text style={[styles.statValue, { color: colors.text }]}>{predicted48h}</Text>
-                <Ionicons
-                  name={
-                    predictionDelta > 0
-                      ? "trending-up"
-                      : predictionDelta < 0
-                        ? "trending-down"
-                        : "remove-outline"
-                  }
-                  size={14}
-                  color={
-                    predictionDelta > 0 ? RED : predictionDelta < 0 ? GREEN : colors.textSecondary
-                  }
-                />
-                <Text
+          {/* Blood bank reserve row */}
+          <View style={styles.bloodHeader}>
+            <Text style={[styles.bloodTitle, { color: c.text }]}>Blood Bank Reserve</Text>
+            <Sparkline data={erSeries} height={22} width={64} color={c.critical} />
+          </View>
+          <View style={styles.bloodRow}>
+            {bloodReserve.slice(0, 8).map((e) => (
+              <StatTile
+                key={e.id}
+                label={e.group}
+                value={`${e.unit}`}
+                tone={e.pct < 40 ? c.critical : e.pct < 60 ? c.warning : c.success}
+                style={styles.bloodTile}
+              />
+            ))}
+          </View>
+        </Card>
+
+        {/* Operations metric cards */}
+        <SectionHeader
+          title="Operations"
+          subtitle="Live metrics across the hospital"
+          right={<Badge label="4 live" tone="info" />}
+          style={styles.section}
+        />
+        <View style={styles.opsGrid}>
+          <MetricCard
+            icon="bed-outline"
+            label="Bed occupancy"
+            value={`${formatCapacity(occupancyPct)}`}
+            delta={`${last.occupancy}/200 beds`}
+            deltaTone="neutral"
+            statusTone={statusToneFor(occupancyPct)}
+            spark={occupancySeries.slice(-9)}
+          />
+          <MetricCard
+            icon="pulse-outline"
+            label="ER admissions"
+            value={`${last.admissions}`}
+            delta={`${trendDirection(erSeries) === "up" ? "+" : ""}${Math.round(
+              (erSeries[erSeries.length - 1] / erSeries[0] - 1) * 100
+            )}% vs trend`}
+            deltaTone={erDeltaTone}
+            statusTone="warning"
+            spark={erSeries.slice(-9)}
+          />
+          <MetricCard
+            icon="people-outline"
+            label="On duty"
+            value={`${onDuty.length}`}
+            delta="across 5 depts"
+            deltaTone="neutral"
+            statusTone="success"
+            spark={occupancySeries.slice(-6)}
+          />
+          <MetricCard
+            icon="medical-outline"
+            label="Pharmacy alerts"
+            value={`3`}
+            delta="needs review"
+            deltaTone="down"
+            statusTone="critical"
+            spark={[4, 4, 3, 5, 3, 3, 3]}
+          />
+        </View>
+
+        {/* AI Predictions */}
+        <SectionHeader
+          title="AI Predictions"
+          subtitle={
+            mode === "live"
+              ? "Real regression on today's admissions data"
+              : "Confidence-scored forecasts"
+          }
+          right={
+            <View style={styles.modeToggle}>
+              {(["demo", "live"] as DemoMode[]).map((m) => (
+                <TouchableOpacity
+                  key={m}
+                  onPress={() => setMode(m)}
                   style={[
-                    styles.deltaText,
-                    {
-                      color:
-                        predictionDelta > 0 ? RED : predictionDelta < 0 ? GREEN : colors.textSecondary,
-                    },
+                    styles.modeBtn,
+                    mode === m && { backgroundColor: c.primary, borderColor: c.primary },
                   ]}
                 >
-                  {predictionDelta > 0 ? "+" : ""}
-                  {predictionDelta}
-                </Text>
-              </View>
+                  {mode === m ? (
+                    <Ionicons name="pulse" size={12} color="#0A0E1A" />
+                  ) : (
+                    <Ionicons name="pulse-outline" size={12} color={c.textSecondary} />
+                  )}
+                  <Text
+                    style={[
+                      styles.modeLabel,
+                      mode === m ? { color: "#0A0E1A" } : { color: c.textSecondary },
+                    ]}
+                  >
+                    {MODE_LABELS[m].label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
-
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-
-            <View style={styles.statBlock}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>ICU</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{icuOccupancy}</Text>
-            </View>
-
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-
-            <View style={styles.statBlock}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>ER visits</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{emergencyVisits}</Text>
-            </View>
-
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-
-            <View style={styles.statBlock}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>14d avg</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{avgOccupancy}</Text>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* ── PHARMACY STOCK ── */}
-      <View style={styles.sectionHeader}>
-        <Ionicons name="medical-outline" size={16} color={colors.primary} />
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Pharmacy Stock</Text>
-        <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>
-          {medicines.length} items
-        </Text>
-      </View>
-
-      {loading ? (
-        <View style={styles.medicineScroll}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} width={156} height={128} radius={10} dark={dark} />
-          ))}
-        </View>
-      ) : (
+          }
+          style={styles.section}
+        />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.medicineScroll}
+          contentContainerStyle={styles.predictionRow}
         >
-          {medicines.map((med) => {
-            const status = stockStatus(med.daysLeft);
-            const sColor = STATUS_COLORS[status];
-            const stockPct = Math.min(100, Math.round((med.currentStock / med.reorderPoint) * 50));
+          {predictions.map((p) => (
+            <Card key={p.id} style={styles.predictionCard}>
+              <View style={styles.predictTop}>
+                <Text style={[styles.predictTitle, { color: c.textSecondary }]}>{p.title}</Text>
+                <Ionicons
+                  name={
+                    p.direction === "up"
+                      ? "trending-up"
+                      : p.direction === "down"
+                        ? "trending-down"
+                        : "remove"
+                  }
+                  size={16}
+                  color={
+                    p.direction === "up" ? c.critical : p.direction === "down" ? c.success : c.textMuted
+                  }
+                />
+              </View>
+              <Text style={[styles.predictValue, { color: c.text }]}>{p.value}</Text>
+              <Text style={[styles.predictRange, { color: c.textMuted }]}>
+                forecast {p.range}
+              </Text>
+              <Text style={[styles.predictDelta, { color: c.textSecondary }]}>
+                {p.delta} · {p.over}
+              </Text>
+              <View style={styles.confidenceRow}>
+                <ProgressBar
+                  label="Confidence"
+                  valueLabel={`${Math.round(p.confidence * 100)}%`}
+                  progress={p.confidence}
+                  color={
+                    p.confidence >= 0.8 ? c.success : p.confidence >= 0.7 ? c.warning : c.critical
+                  }
+                  height={6}
+                  style={styles.confidenceBar}
+                />
+              </View>
+            </Card>
+          ))}
+        </ScrollView>
 
-            return (
-              <View
-                key={med.id}
-                style={[
-                  styles.medCard,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                ]}
-              >
-                <View style={styles.medHeader}>
-                  <View style={[styles.statusDot, { backgroundColor: sColor.dot }]} />
-                  <Text style={[styles.medCategory, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {med.category}
-                  </Text>
-                </View>
-
-                <Text style={[styles.medName, { color: colors.text }]} numberOfLines={2}>
-                  {med.name}
-                </Text>
-
-                <View style={styles.stockRow}>
-                  <Text style={[styles.stockNumber, { color: colors.text }]}>
-                    {med.currentStock}
-                  </Text>
-                  <Text style={[styles.stockUnit, { color: colors.textSecondary }]}>
-                    {med.unit}
-                  </Text>
-                </View>
-
-                <View
-                  style={[styles.progressTrack, { backgroundColor: colors.backgroundElement }]}
-                >
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${stockPct}%`, backgroundColor: sColor.dot },
-                    ]}
+        {/* Smart Resource Allocation */}
+        <SectionHeader
+          title="Smart Resource Allocation"
+          subtitle="AI-suggested actions"
+          right={<Badge label="Live" tone="success" />}
+          style={styles.section}
+        />
+        <View style={styles.resourceList}>
+          {recommendations.map((r) => (
+            <Card key={r.id} style={[styles.resourceCard, r.applied && styles.resourceApplied]}>
+              <View style={styles.resourceTop}>
+                <View style={styles.resourceCatRow}>
+                  <Badge label={r.category} tone="info" />
+                  <Badge
+                    label={r.impact}
+                    tone={r.impact === "high" ? "critical" : r.impact === "medium" ? "warning" : "info"}
                   />
                 </View>
-
-                <View style={styles.medFooter}>
-                  <View style={[styles.daysLeftBadge, { backgroundColor: sColor.bg }]}>
-                    <Text style={[styles.daysLeftText, { color: sColor.text }]}>
-                      {med.daysLeft < 999 ? `${med.daysLeft}d left` : "N/A"}
-                    </Text>
-                  </View>
-                  <Text style={[styles.dailyUse, { color: colors.textSecondary }]}>
-                    ~{med.dailyUse}/d
-                  </Text>
-                </View>
+                {r.applied ? <Badge label="Applied" tone="success" /> : null}
               </View>
-            );
-          })}
-        </ScrollView>
-      )}
-
-      {/* ── QUICK STATS ── */}
-      {!loading && (
-        <View style={styles.quickStats}>
-          {[
-            {
-              icon: "alert-circle-outline" as const,
-              label: "Low stock",
-              value: String(medicines.filter((m) => m.daysLeft < 14).length),
-              color: RED,
-            },
-            {
-              icon: "trending-up-outline" as const,
-              label: "Admits today",
-              value: String(dailyData[dailyData.length - 1].admissions),
-              color: colors.primary,
-            },
-            {
-              icon: "log-out-outline" as const,
-              label: "Discharges",
-              value: String(dailyData[dailyData.length - 1].discharges),
-              color: colors.textSecondary,
-            },
-          ].map((item, i) => (
-            <View key={i} style={[styles.quickStatCard, { backgroundColor: colors.card }]}>
-              <Ionicons name={item.icon} size={18} color={item.color} />
-              <Text style={[styles.quickStatValue, { color: colors.text }]}>{item.value}</Text>
-              <Text style={[styles.quickStatLabel, { color: colors.textSecondary }]}>
-                {item.label}
-              </Text>
-            </View>
+              <Text style={[styles.resourceTitle, { color: c.text }]}>{r.title}</Text>
+              <Text style={[styles.resourceDetail, { color: c.textSecondary }]}>{r.detail}</Text>
+              <Text style={[styles.resourceSavings, { color: c.success }]}>{r.savings}</Text>
+              <View style={styles.resourceActions}>
+                <GradientButton
+                  label="Apply"
+                  icon="checkmark"
+                  variant={r.applied ? "secondary" : "primary"}
+                  onPress={() =>
+                    setRecommendations((prev) =>
+                      prev.map((x) => (x.id === r.id ? { ...x, applied: !x.applied } : x))
+                    )
+                  }
+                  style={styles.resourceBtn}
+                />
+                {!r.applied ? (
+                  <GradientButton
+                    label="Dismiss"
+                    icon="close"
+                    variant="ghost"
+                    onPress={() =>
+                      setRecommendations((prev) => prev.filter((x) => x.id !== r.id))
+                    }
+                    style={styles.resourceBtn}
+                  />
+                ) : null}
+              </View>
+            </Card>
           ))}
         </View>
-      )}
-    </ScrollView>
-  );
-}
 
-function SkeletonCard({ dark, height }: { dark: boolean; height: number }) {
-  return (
-    <View style={[styles.card, { height }]}>
-      <View style={styles.skRow}>
-        <Skeleton width={120} height={14} dark={dark} />
-        <Skeleton width={40} height={14} dark={dark} />
-      </View>
-      <Skeleton width={160} height={32} dark={dark} style={{ marginTop: Spacing.two }} />
-      <Skeleton width="100%" height={96} dark={dark} style={{ marginTop: Spacing.three }} />
-      <View style={styles.skRow}>
-        {[0, 1, 2, 3].map((i) => (
-          <View key={i} style={styles.skStat}>
-            <Skeleton width="80%" height={10} dark={dark} />
-            <Skeleton width="60%" height={18} dark={dark} style={{ marginTop: Spacing.one }} />
+        {/* Theatre Schedule */}
+        <SectionHeader
+          title="Theatre Schedule"
+          subtitle="Today · 5 procedures"
+          style={styles.section}
+        />
+        <Card>
+          {theatreData.slots.map((s, i) => (
+            <View
+              key={s.id}
+              style={[styles.theatreRow, i < theatreData.slots.length - 1 && styles.theatreDivider]}
+            >
+              <View style={[styles.theatreTimeWrap, { borderColor: c.border }]}>
+                <Text style={[styles.theatreTime, { color: c.text }]}>{s.time}</Text>
+                <Text style={[styles.theatreName, { color: c.textMuted }]}>{s.theatre}</Text>
+              </View>
+              <View style={styles.theatreBody}>
+                <Text style={[styles.theatreProcedure, { color: c.text }]} numberOfLines={1}>
+                  {s.procedure}
+                </Text>
+                <Text style={[styles.theatreSurgeon, { color: c.textSecondary }]}>
+                  {s.surgeon} · {s.durationMin} min
+                </Text>
+              </View>
+              <Badge
+                label={s.status}
+                tone={
+                  s.status === "in-progress"
+                    ? "success"
+                    : s.status === "delayed"
+                      ? "critical"
+                      : "default"
+                }
+              />
+            </View>
+          ))}
+        </Card>
+
+        {/* Staff Availability */}
+        <SectionHeader
+          title="Staff Availability"
+          subtitle="Shift coverage by duty"
+          right={<Badge label={`${onDuty.length} on duty`} tone="success" />}
+          style={styles.section}
+        />
+        <Card>
+          <View style={styles.staffDeptRow}>
+            {Object.entries(staffByDept).map(([dept, count]) => (
+              <StatTile key={dept} label={dept} value={`${count}`} style={styles.deptTile} />
+            ))}
           </View>
-        ))}
-      </View>
-    </View>
+          <View style={styles.staffBarList}>
+            {availability.map((s) => (
+              <ProgressBar
+                key={s.id}
+                label={s.name}
+                valueLabel={`${s.role}`}
+                progress={Math.max(0.15, s.available)}
+                color={s.avatarColor}
+                style={styles.staffBar}
+              />
+            ))}
+          </View>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
+  safe: { flex: 1, backgroundColor: c.background },
+  content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.three },
 
-  card: {
-    borderRadius: 12,
-    padding: Spacing.three,
-    marginBottom: Spacing.three,
-  },
-  cardHeader: {
+  header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: Spacing.two,
   },
-  cardHeaderLeft: { flexDirection: "row", alignItems: "center", gap: Spacing.two },
-  cardLabel: { fontSize: 13, fontWeight: "500" },
-  badge: { paddingHorizontal: Spacing.two, paddingVertical: Spacing.one, borderRadius: 6 },
-  badgeText: { fontSize: 13, fontWeight: "700" },
-
-  occupancyRow: {
+  greetingBlock: { flex: 1 },
+  greeting: { fontSize: 13, fontWeight: "500" },
+  userName: { fontSize: 20, fontWeight: "700", marginTop: 2 },
+  hospital: { fontSize: 12, marginTop: 2 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: Spacing.two },
+  livePill: {
     flexDirection: "row",
-    alignItems: "baseline",
-    marginBottom: Spacing.two,
-  },
-  occupancyBig: { fontSize: 36, fontWeight: "700", letterSpacing: -1 },
-  occupancyDenom: { fontSize: 14, fontWeight: "500", marginLeft: Spacing.one },
-
-  chartWrap: { marginBottom: Spacing.three, marginLeft: -Spacing.two },
-  xLabel: { fontSize: 9 },
-
-  statsRow: { flexDirection: "row", alignItems: "center" },
-  statBlock: { flex: 1, alignItems: "center" },
-  statLabel: { fontSize: 11, fontWeight: "500", marginBottom: Spacing.one },
-  statValue: { fontSize: 18, fontWeight: "700" },
-  statDivider: { width: 1, height: 32, marginHorizontal: Spacing.one },
-  forecastRow: { flexDirection: "row", alignItems: "center", gap: Spacing.one },
-  deltaText: { fontSize: 12, fontWeight: "600" },
-
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.two,
-    marginBottom: Spacing.three,
-  },
-  sectionTitle: { fontSize: 15, fontWeight: "600", flex: 1 },
-  sectionCount: { fontSize: 12, fontWeight: "500" },
-
-  medicineScroll: { gap: Spacing.two, paddingBottom: Spacing.one },
-  medCard: {
-    width: 156,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 12,
-    gap: Spacing.two,
-  },
-  medHeader: { flexDirection: "row", alignItems: "center", gap: Spacing.one },
-  statusDot: { width: 7, height: 7, borderRadius: 4 },
-  medCategory: { fontSize: 10, fontWeight: "500", flex: 1 },
-  medName: { fontSize: 13, fontWeight: "600", lineHeight: 17, minHeight: 34 },
-
-  stockRow: { flexDirection: "row", alignItems: "baseline", gap: Spacing.one },
-  stockNumber: { fontSize: 20, fontWeight: "700" },
-  stockUnit: { fontSize: 11, fontWeight: "400" },
-
-  progressTrack: { height: 4, borderRadius: 2, overflow: "hidden" },
-  progressFill: { height: 4, borderRadius: 2 },
-
-  medFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: Spacing.one,
-  },
-  daysLeftBadge: { paddingHorizontal: Spacing.two, paddingVertical: Spacing.one, borderRadius: 4 },
-  daysLeftText: { fontSize: 10, fontWeight: "700" },
-  dailyUse: { fontSize: 10, fontWeight: "400" },
-
-  quickStats: { flexDirection: "row", gap: Spacing.two, marginTop: Spacing.three },
-  quickStatCard: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 12,
     alignItems: "center",
     gap: Spacing.one,
+    backgroundColor: `${c.success}18`,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: Radii.pill,
   },
-  quickStatValue: { fontSize: 20, fontWeight: "700" },
-  quickStatLabel: { fontSize: 11, fontWeight: "500" },
+  liveDot: { width: 6, height: 6, borderRadius: 3 },
+  liveText: { fontSize: 11, fontWeight: "700" },
+  bellBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: Radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bellDot: {
+    position: "absolute",
+    top: 8,
+    right: 9,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: c.background,
+  },
 
-  skRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  skStat: { flex: 1, alignItems: "center" },
+  gaugeCard: { gap: Spacing.three },
+  gaugeRow: { flexDirection: "row", justifyContent: "space-between" },
+
+  bloodHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  bloodTitle: { fontSize: 14, fontWeight: "600" },
+  bloodRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
+  bloodTile: { width: "22%", marginBottom: Spacing.one },
+
+  section: { marginTop: Spacing.two },
+
+  modeToggle: {
+    flexDirection: "row",
+    gap: Spacing.one,
+    backgroundColor: c.card,
+    borderRadius: Radii.pill,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  modeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: Radii.pill,
+  },
+  modeLabel: { fontSize: 11, fontWeight: "700" },
+  opsGrid: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two, justifyContent: "space-between" },
+  opsCard: { flexBasis: "48%" },
+
+  predictionRow: { gap: Spacing.two, paddingRight: Spacing.one },
+  predictionCard: { width: 220, gap: Spacing.two },
+  predictTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  predictTitle: { fontSize: 12, fontWeight: "600" },
+  predictValue: { fontSize: 24, fontWeight: "700" },
+  predictDelta: { fontSize: 12 },
+  predictRange: { fontSize: 11, marginTop: Spacing.one },
+  confidenceRow: { marginTop: Spacing.one },
+  confidenceBar: { marginTop: Spacing.two },
+
+  resourceList: { gap: Spacing.two },
+  resourceCard: { gap: Spacing.two },
+  resourceApplied: { opacity: 0.7 },
+  resourceTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  resourceCatRow: { flexDirection: "row", gap: Spacing.one },
+  resourceTitle: { fontSize: 16, fontWeight: "700" },
+  resourceDetail: { fontSize: 13, lineHeight: 18 },
+  resourceSavings: { fontSize: 12, fontWeight: "600" },
+  resourceActions: { flexDirection: "row", gap: Spacing.two, marginTop: Spacing.one },
+  resourceBtn: { flex: 1 },
+
+  theatreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  theatreDivider: { borderBottomWidth: 1, borderBottomColor: c.border },
+  theatreTimeWrap: {
+    width: 56,
+    height: 44,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  theatreTime: { fontSize: 13, fontWeight: "700" },
+  theatreName: { fontSize: 10, marginTop: 1 },
+  theatreBody: { flex: 1 },
+  theatreProcedure: { fontSize: 14, fontWeight: "600" },
+  theatreSurgeon: { fontSize: 11, marginTop: 2 },
+
+  staffDeptRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.three, marginBottom: Spacing.three },
+  deptTile: { width: 72 },
+  staffBarList: { gap: Spacing.two },
+  staffBar: { marginTop: Spacing.one },
 });

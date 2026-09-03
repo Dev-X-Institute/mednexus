@@ -1,0 +1,4518 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.claude/
+  settings.json
+assets/
+  expo.icon/
+    Assets/
+      expo-symbol 2.svg
+      grid.png
+    icon.json
+  images/
+    tabIcons/
+      explore.png
+      explore@2x.png
+      explore@3x.png
+      home.png
+      home@2x.png
+      home@3x.png
+    android-icon-background.png
+    android-icon-foreground.png
+    android-icon-monochrome.png
+    expo-badge-white.png
+    expo-badge.png
+    expo-logo.png
+    favicon.png
+    icon.png
+    logo-glow.png
+    react-logo.png
+    react-logo@2x.png
+    react-logo@3x.png
+    splash-icon.png
+    tutorial-web.png
+scripts/
+  reset-project.js
+src/
+  app/
+    (tabs)/
+      _layout.tsx
+      analytics.tsx
+      assistant.tsx
+      dashboard.tsx
+      memory.tsx
+      more.tsx
+    _layout.tsx
+    index.tsx
+  components/
+    ui/
+      badge.tsx
+      card.tsx
+      chip.tsx
+      collapsible.tsx
+      gradient-button.tsx
+      index.ts
+      metric-card.tsx
+      progress-bar.tsx
+      ring-gauge.tsx
+      section-header.tsx
+      showcase.tsx
+      sparkline.tsx
+      stat-tile.tsx
+      status-dot.tsx
+    external-link.tsx
+    skeleton.tsx
+    tab-bar.tsx
+    themed-text.tsx
+    themed-view.tsx
+  constants/
+    theme.ts
+  context/
+    session.tsx
+  data/
+    admissions.json
+    bloodBank.json
+    medicineStock.json
+    pastCases.json
+    predictions.json
+    resourceRecommendations.json
+    staff.json
+    theatreSchedule.json
+  hooks/
+    use-theme.ts
+  utils/
+    cases.ts
+    predictions.ts
+    types.ts
+  global.css
+.gitignore
+AGENTS.md
+app.json
+babel.config.js
+CLAUDE.md
+eslint.config.js
+LICENSE
+metro.config.js
+nativewind-env.d.ts
+package.json
+README.md
+tailwind.config.js
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/app/(tabs)/analytics.tsx">
+import { Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors, Spacing } from "@/constants/theme";
+import { Card, SectionHeader } from "@/components/ui";
+
+export default function AnalyticsScreen() {
+  return (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <SectionHeader title="Analytics" subtitle="Trends across occupancy, pharmacy and staff" />
+        <Card>
+          <Text style={styles.todo}>Analytics screen in progress</Text>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Colors.dark.background },
+  content: { padding: Spacing.three, gap: Spacing.three },
+  todo: { fontSize: 14, color: Colors.dark.textSecondary },
+});
+</file>
+
+<file path="src/app/(tabs)/assistant.tsx">
+import { Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors, Spacing } from "@/constants/theme";
+import { Card, SectionHeader } from "@/components/ui";
+
+export default function AssistantScreen() {
+  return (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <SectionHeader title="Clinical Assistant" subtitle="Ask anything about live operations" />
+        <Card>
+          <Text style={styles.todo}>Assistant screen in progress</Text>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Colors.dark.background },
+  content: { padding: Spacing.three, gap: Spacing.three },
+  todo: { fontSize: 14, color: Colors.dark.textSecondary },
+});
+</file>
+
+<file path="src/app/(tabs)/memory.tsx">
+import { useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TextInput } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors, Spacing } from "@/constants/theme";
+import { Card, SectionHeader, Chip, GradientButton, Badge } from "@/components/ui";
+import { matchPatientProfile, similarCases } from "@/utils/cases";
+
+const c = Colors.dark;
+const SYMPTOMS = ["Fever", "Chest pain", "Dyspnea", "Kidney injury", "Hypertension", "Hypotension", "Cough", "Abdominal pain", "Headache", "Fatigue", "Tachycardia", "Confusion"];
+
+export default function MemoryScreen() {
+  const [age, setAge] = useState(45);
+  const [selected, setSelected] = useState<string[]>(["Fever", "Hypertension"]);
+  const [notes, setNotes] = useState("");
+  const [searched, setSearched] = useState(false);
+  const profile = useMemo(() => ({ age, symptoms: selected, notes }), [age, selected, notes]);
+  const result = useMemo(() => matchPatientProfile(profile), [profile]);
+  const matches = useMemo(() => similarCases(profile), [profile]);
+  const updateAge = (delta: number) => { setAge((value) => Math.max(1, Math.min(100, value + delta))); setSearched(false); };
+  const toggle = (symptom: string) => { setSelected((items) => items.includes(symptom) ? items.filter((item) => item !== symptom) : [...items, symptom]); setSearched(false); };
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Card variant="elevated" style={styles.hero}>
+          <View style={styles.heroIcon}><Ionicons name="brain-outline" size={27} color={c.text} /></View>
+          <View style={styles.heroCopy}><Text style={styles.heroTitle}>AI Doctor Memory</Text><Text style={styles.heroSubtitle}>Search anonymized clinical patterns across 34 hospitals</Text></View>
+        </Card>
+        <Card style={styles.form}>
+          <SectionHeader title="Patient profile" subtitle="Use de-identified clinical information only" />
+          <View style={styles.ageRow}><View><Text style={styles.label}>Age</Text><Text style={styles.hint}>Adjust in 5-year steps</Text></View><View style={styles.ageControl}><GradientButton label="−" variant="secondary" onPress={() => updateAge(-5)} style={styles.ageButton} /><Text style={styles.ageValue}>{age} y</Text><GradientButton label="+" variant="secondary" onPress={() => updateAge(5)} style={styles.ageButton} /></View></View>
+          <Text style={styles.label}>Symptoms & conditions</Text>
+          <View style={styles.chips}>{SYMPTOMS.map((symptom) => <Chip key={symptom} label={symptom} selected={selected.includes(symptom)} onPress={() => toggle(symptom)} />)}</View>
+          <Text style={styles.label}>Clinical notes <Text style={styles.optional}>optional</Text></Text>
+          <TextInput value={notes} onChangeText={(value) => { setNotes(value); setSearched(false); }} placeholder="Labs, imaging, history, or current concern…" placeholderTextColor={c.textMuted} multiline textAlignVertical="top" style={styles.notes} />
+          <GradientButton label="Search Knowledge Network" icon="search-outline" fullWidth onPress={() => setSearched(true)} />
+        </Card>
+        {searched ? <>
+          <Card style={styles.recommendation}>
+            <SectionHeader title="AI recommendation" subtitle="Decision support — verify against local protocols" />
+            <View style={styles.countRow}><Text style={styles.count}>{result.matchCount}</Text><Text style={styles.countCaption}>similar cases{`\n`}matched to this profile</Text></View>
+            <View style={styles.divider} /><Text style={styles.pathway}>{result.pathway.label}</Text>
+            {result.pathway.steps.map((step, index) => <View style={styles.step} key={`${step}-${index}`}><View style={styles.stepNumber}><Text style={styles.stepNumberText}>{index + 1}</Text></View><Text style={styles.stepText}>{step}</Text></View>)}
+            <View style={styles.stats}><Stat value={`${result.stats.recovery}%`} label="Recovery rate" color={c.success} /><Stat value={`${result.stats.stayDays} d`} label="Avg. stay" color={c.primary} /><Stat value={`${Math.round(result.stats.confidence * 100)}%`} label="Confidence" color={c.info} /></View>
+            <Text style={styles.complicationTitle}>Potential complications</Text><View style={styles.complications}>{result.complications.map((item) => <Badge key={item} label={item} tone="warning" />)}</View>
+          </Card>
+          <SectionHeader title="Similar cases" subtitle="Anonymized · ranked by similarity" />
+          <View style={styles.caseList}>{matches.map((item) => <Card key={item.caseId} style={styles.caseCard}><Text style={styles.hospital}>{item.hospital}</Text><Text style={styles.diagnosis}>{item.diagnosis}</Text><Text style={styles.caseAge}>{item.age}</Text><View style={styles.caseFooter}><Text style={styles.match}>{Math.round(item.match * 100)}% match</Text><Text style={styles.anonymized}>Anonymized</Text></View></Card>)}</View>
+        </> : null}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Stat({ value, label, color }: { value: string; label: string; color: string }) { return <View style={styles.stat}><Text style={[styles.statValue, { color }]}>{value}</Text><Text style={styles.statLabel}>{label}</Text></View>; }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background }, content: { padding: Spacing.three, paddingBottom: 132, gap: Spacing.three },
+  hero: { flexDirection: "row", alignItems: "center", gap: Spacing.three }, heroIcon: { width: 58, height: 58, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: c.primaryDim }, heroCopy: { flex: 1 }, heroTitle: { color: c.text, fontSize: 21, fontWeight: "700" }, heroSubtitle: { color: c.textSecondary, fontSize: 13, lineHeight: 19, marginTop: 3 },
+  form: { gap: Spacing.three }, label: { color: c.text, fontSize: 14, fontWeight: "700" }, hint: { color: c.textMuted, fontSize: 11, marginTop: 2 }, optional: { color: c.textMuted, fontWeight: "400" }, ageRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }, ageControl: { flexDirection: "row", alignItems: "center", gap: Spacing.one }, ageButton: { height: 36, minWidth: 36, paddingHorizontal: 0 }, ageValue: { color: c.primary, fontSize: 20, fontWeight: "700", minWidth: 48, textAlign: "center" }, chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two }, notes: { minHeight: 92, borderRadius: 12, backgroundColor: c.cardElevated, color: c.text, padding: Spacing.three, borderWidth: 1, borderColor: c.border, fontSize: 14 },
+  recommendation: { gap: Spacing.three }, countRow: { flexDirection: "row", alignItems: "center", gap: Spacing.three }, count: { color: c.primary, fontSize: 50, fontWeight: "800" }, countCaption: { color: c.textSecondary, fontSize: 14, lineHeight: 20 }, divider: { height: 1, backgroundColor: c.border }, pathway: { color: c.text, fontSize: 17, fontWeight: "700" }, step: { flexDirection: "row", alignItems: "center", gap: Spacing.two }, stepNumber: { height: 26, width: 26, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: c.primaryDim }, stepNumberText: { color: c.text, fontSize: 12, fontWeight: "700" }, stepText: { color: c.text, flex: 1, fontSize: 14, lineHeight: 20 }, stats: { flexDirection: "row", gap: Spacing.two }, stat: { flex: 1, alignItems: "center", paddingVertical: Spacing.two, borderRadius: 12, backgroundColor: c.cardElevated }, statValue: { fontSize: 18, fontWeight: "800" }, statLabel: { color: c.textSecondary, fontSize: 10, marginTop: 3 }, complicationTitle: { color: c.warning, fontSize: 13, fontWeight: "700" }, complications: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.one },
+  caseList: { gap: Spacing.two }, caseCard: { gap: Spacing.one }, hospital: { color: c.textSecondary, fontSize: 12 }, diagnosis: { color: c.text, fontSize: 16, fontWeight: "700" }, caseAge: { color: c.textMuted, fontSize: 12 }, caseFooter: { flexDirection: "row", justifyContent: "space-between", marginTop: Spacing.two }, match: { color: c.primary, fontSize: 12, fontWeight: "700" }, anonymized: { color: c.success, fontSize: 12, fontWeight: "600" },
+});
+</file>
+
+<file path="src/app/(tabs)/more.tsx">
+import { Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors, Spacing } from "@/constants/theme";
+import { Card, SectionHeader } from "@/components/ui";
+
+export default function MoreScreen() {
+  return (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <SectionHeader title="More" subtitle="Settings and departments" />
+        <Card>
+          <Text style={styles.todo}>More screen in progress</Text>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Colors.dark.background },
+  content: { padding: Spacing.three, gap: Spacing.three },
+  todo: { fontSize: 14, color: Colors.dark.textSecondary },
+});
+</file>
+
+<file path="src/components/ui/badge.tsx">
+import { StyleSheet, Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { Colors, Radii, Spacing } from "@/constants/theme";
+
+type BadgeTone = "info" | "success" | "warning" | "critical" | "default";
+
+interface BadgeProps {
+  label: string | number;
+  tone?: BadgeTone;
+  style?: StyleProp<ViewStyle>;
+}
+
+const ALPHA_SUFFIX = "2E";
+
+export function Badge({ label, tone = "default", style }: BadgeProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const toneColor =
+    tone === "default"
+      ? colors.textSecondary
+      : tone === "info"
+      ? colors.info
+      : tone === "success"
+      ? colors.success
+      : tone === "warning"
+      ? colors.warning
+      : colors.critical;
+
+  const background =
+    tone === "default" ? `${colors.border}${ALPHA_SUFFIX}` : `${toneColor}${ALPHA_SUFFIX}`;
+  const textColor = tone === "default" ? colors.textSecondary : toneColor;
+
+  return (
+    <View
+      style={[
+        styles.badge,
+        {
+          backgroundColor: background,
+        },
+        style,
+      ]}
+    >
+      <Text style={[styles.label, { color: textColor }]} numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  badge: {
+    alignSelf: "flex-start",
+    borderRadius: Radii.pill,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+});
+</file>
+
+<file path="src/components/ui/card.tsx">
+import { View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { Colors, Radii, Spacing } from "@/constants/theme";
+
+type CardVariant = "default" | "elevated" | "glass";
+
+interface CardProps {
+  variant?: CardVariant;
+  style?: StyleProp<ViewStyle>;
+  children?: React.ReactNode;
+}
+
+export function Card({ variant = "default", style, children }: CardProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const backgrounds: Record<CardVariant, string> = {
+    default: colors.card,
+    elevated: colors.cardElevated,
+    glass: colors.glass,
+  };
+
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: backgrounds[variant],
+          borderColor: colors.border,
+          borderWidth: 1,
+          borderRadius: Radii.lg,
+          padding: Spacing.three,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+</file>
+
+<file path="src/components/ui/chip.tsx">
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors, Gradients, Radii, Spacing } from "@/constants/theme";
+
+interface ChipProps {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  leading?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function Chip({ label, selected, onPress, leading, style }: ChipProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  return (
+    <Pressable onPress={onPress} style={[styles.chip, style]}>
+      {selected ? (
+        <LinearGradient
+          colors={Gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.chip}
+        >
+          <View style={styles.pill}>
+            {leading}
+            <Text style={[styles.label, { color: "#FFFFFF" }]}>{label}</Text>
+          </View>
+        </LinearGradient>
+      ) : (
+        <View
+          style={[
+            styles.pill,
+            {
+              borderColor: colors.border,
+              borderWidth: 1,
+              backgroundColor: colors.cardElevated,
+            },
+          ]}
+        >
+          {leading}
+          <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  chip: {
+    borderRadius: Radii.pill,
+    overflow: "hidden",
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+});
+</file>
+
+<file path="src/components/ui/gradient-button.tsx">
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { Colors, Gradients, Radii, Spacing } from "@/constants/theme";
+
+type GlyphName = keyof typeof Ionicons.glyphMap;
+type ButtonVariant = "primary" | "secondary" | "ghost";
+
+interface GradientButtonProps {
+  label: string;
+  icon?: GlyphName;
+  variant?: ButtonVariant;
+  onPress?: () => void;
+  loading?: boolean;
+  style?: StyleProp<ViewStyle>;
+  fullWidth?: boolean;
+}
+
+export function GradientButton({
+  label,
+  icon,
+  variant = "primary",
+  onPress,
+  loading = false,
+  style,
+  fullWidth = false,
+}: GradientButtonProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const content = loading ? (
+    <ActivityIndicator
+      color={variant === "primary" ? "#FFFFFF" : colors.accent}
+      size="small"
+    />
+  ) : (
+    <>
+      {icon ? (
+        <Ionicons
+          name={icon}
+          size={18}
+          color={variant === "primary" ? "#FFFFFF" : colors.text}
+          style={styles.icon}
+        />
+      ) : null}
+      <Text
+        style={[
+          styles.label,
+          {
+            color:
+              variant === "primary" ? "#FFFFFF" : variant === "ghost" ? colors.accent : colors.text,
+          },
+        ]}
+      >
+        {label}
+      </Text>
+    </>
+  );
+
+  const baseStyle = [styles.base, fullWidth && styles.fullWidth, style];
+
+  if (variant === "primary") {
+    return (
+      <Pressable onPress={onPress} disabled={loading}>
+        <LinearGradient
+          colors={Gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={baseStyle}
+        >
+          {content}
+        </LinearGradient>
+      </Pressable>
+    );
+  }
+
+  return (
+    <Pressable onPress={onPress} disabled={loading}>
+      <View
+        style={[
+          baseStyle,
+          variant === "secondary" && {
+            backgroundColor: colors.cardElevated,
+            borderColor: colors.border,
+            borderWidth: 1,
+          },
+        ]}
+      >
+        {content}
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  base: {
+    height: 48,
+    borderRadius: Radii.md,
+    paddingHorizontal: Spacing.four,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fullWidth: {
+    width: "100%",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  icon: {
+    marginRight: Spacing.two,
+  },
+});
+</file>
+
+<file path="src/components/ui/index.ts">
+export { Card } from "./card";
+export { GradientButton } from "./gradient-button";
+export { RingGauge } from "./ring-gauge";
+export { Sparkline } from "./sparkline";
+export { SectionHeader } from "./section-header";
+export { Chip } from "./chip";
+export { StatTile } from "./stat-tile";
+export { ProgressBar } from "./progress-bar";
+export { Badge } from "./badge";
+export { StatusDot } from "./status-dot";
+export { MetricCard } from "./metric-card";
+</file>
+
+<file path="src/components/ui/metric-card.tsx">
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Colors, Spacing } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { Card } from "./card";
+import { StatusDot } from "./status-dot";
+import { Sparkline } from "./sparkline";
+
+type GlyphName = keyof typeof Ionicons.glyphMap;
+type DeltaTone = "up" | "down" | "neutral";
+type StatusTone = "success" | "warning" | "critical";
+
+interface MetricCardProps {
+  icon: GlyphName;
+  label: string;
+  value: string;
+  delta?: string;
+  deltaTone?: DeltaTone;
+  spark?: number[];
+  statusTone?: StatusTone;
+}
+
+export function MetricCard({
+  icon,
+  label,
+  value,
+  delta,
+  deltaTone = "neutral",
+  spark,
+  statusTone = "success",
+}: MetricCardProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const deltaColor =
+    deltaTone === "up"
+      ? colors.success
+      : deltaTone === "down"
+      ? colors.critical
+      : colors.textSecondary;
+
+  const statusColor =
+    statusTone === "success"
+      ? colors.success
+      : statusTone === "warning"
+      ? colors.warning
+      : colors.critical;
+
+  return (
+    <Card>
+      <View style={styles.headerRow}>
+        <View style={styles.iconLabel}>
+          <StatusDot color={statusColor} />
+          <Ionicons name={icon} size={14} color={colors.accent} />
+          <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+        </View>
+        <Ionicons name="ellipsis-horizontal" size={16} color={colors.textMuted} />
+      </View>
+
+      <View style={styles.lowerRow}>
+        <View style={styles.valueColumn}>
+          <Text style={[styles.value, { color: colors.text }]} numberOfLines={1}>
+            {value}
+          </Text>
+          {delta ? (
+            <Text style={[styles.delta, { color: deltaColor }]}>{delta}</Text>
+          ) : null}
+        </View>
+        {spark && spark.length > 0 ? <Sparkline data={spark} height={36} width={72} /> : null}
+      </View>
+    </Card>
+  );
+}
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  iconLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+  },
+  label: {
+    fontSize: 12,
+  },
+  lowerRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginTop: Spacing.three,
+  },
+  valueColumn: {
+    flex: 1,
+  },
+  value: {
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  delta: {
+    fontSize: 12,
+    marginTop: Spacing.one,
+  },
+});
+</file>
+
+<file path="src/components/ui/progress-bar.tsx">
+import { StyleSheet, Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { Colors, Spacing } from "@/constants/theme";
+
+interface ProgressBarProps {
+  label: string;
+  valueLabel?: string;
+  progress: number;
+  color?: string;
+  height?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function ProgressBar({
+  label,
+  valueLabel,
+  progress,
+  color,
+  height = 8,
+  style,
+}: ProgressBarProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const clamped = Math.max(0, Math.min(1, progress));
+  const fillColor = color ?? colors.primary;
+
+  return (
+    <View style={style}>
+      <View style={styles.labelRow}>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+        {valueLabel ? (
+          <Text style={[styles.valueLabel, { color: colors.text }]}>{valueLabel}</Text>
+        ) : null}
+      </View>
+      <View
+        style={[
+          styles.track,
+          {
+            height,
+            borderRadius: height / 2,
+            borderColor: colors.border,
+            borderWidth: 1,
+            backgroundColor: colors.cardElevated,
+            marginTop: Spacing.one,
+          },
+        ]}
+      >
+        <View
+          style={{
+            width: `${clamped * 100}%`,
+            height,
+            borderRadius: height / 2,
+            backgroundColor: fillColor,
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  label: {
+    fontSize: 12,
+  },
+  valueLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  track: {
+    overflow: "hidden",
+  },
+});
+</file>
+
+<file path="src/components/ui/ring-gauge.tsx">
+import {
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import Svg, { Circle, G } from "react-native-svg";
+import { Colors } from "@/constants/theme";
+
+type GaugeTone = "primary" | "success" | "warning" | "critical";
+
+interface RingGaugeProps {
+  value: number;
+  size?: number;
+  strokeWidth?: number;
+  tone?: GaugeTone;
+  centerLabel?: string;
+  centerCaption?: string;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function RingGauge({
+  value,
+  size = 120,
+  strokeWidth = 10,
+  tone = "primary",
+  centerLabel,
+  centerCaption,
+  style,
+}: RingGaugeProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  const clamp = Math.max(0, Math.min(100, value));
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dash = (circumference * clamp) / 100;
+
+  const strokeColor =
+    tone === "primary"
+      ? colors.primary
+      : tone === "success"
+      ? colors.success
+      : tone === "warning"
+      ? colors.warning
+      : colors.critical;
+
+  return (
+    <View style={[styles.wrap, { width: size, height: size }, style]}>
+      <Svg width={size} height={size}>
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={colors.border}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <G rotation={-90} origin={`${center}, ${center}`}>
+          <Circle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${circumference - dash}`}
+          />
+        </G>
+      </Svg>
+      <View style={styles.center} pointerEvents="none">
+        {centerLabel ? (
+          <Text style={[styles.label, { color: colors.text }]}>{centerLabel}</Text>
+        ) : null}
+        {centerCaption ? (
+          <Text style={[styles.caption, { color: colors.textSecondary }]}>{centerCaption}</Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  center: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  caption: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+});
+</file>
+
+<file path="src/components/ui/section-header.tsx">
+import { StyleSheet, Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { Colors, Spacing } from "@/constants/theme";
+
+interface SectionHeaderProps {
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function SectionHeader({ title, subtitle, right, style }: SectionHeaderProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  return (
+    <View style={[styles.row, style]}>
+      <View style={styles.textColumn}>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+        {subtitle ? (
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+        ) : null}
+      </View>
+      {right ? <View style={styles.right}>{right}</View> : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  textColumn: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 12,
+    marginTop: Spacing.one,
+  },
+  right: {
+    marginLeft: Spacing.three,
+  },
+});
+</file>
+
+<file path="src/components/ui/showcase.tsx">
+import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
+import { Colors, Spacing } from "@/constants/theme";
+import { Badge } from "./badge";
+import { Chip } from "./chip";
+import { GradientButton } from "./gradient-button";
+import { MetricCard } from "./metric-card";
+import { ProgressBar } from "./progress-bar";
+import { RingGauge } from "./ring-gauge";
+import { SectionHeader } from "./section-header";
+import { Sparkline } from "./sparkline";
+import { StatTile } from "./stat-tile";
+import { StatusDot } from "./status-dot";
+import { Card } from "./card";
+
+export function ShowcaseGallery() {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  return (
+    <ScrollView style={[styles.screen, { backgroundColor: colors.background }]}>
+      <View style={styles.content}>
+        <Card>
+          <SectionHeader title="Primitives" subtitle="Chip, Badge, StatusDot, Buttons" />
+
+          <View style={styles.section}>
+            <SectionHeader title="Chip" />
+            <View style={styles.row}>
+              <Chip label="All" selected onPress={() => {}} />
+              <Chip label="Emerging" selected={false} onPress={() => {}} />
+              <Chip label="Tracked" selected={false} onPress={() => {}} />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <SectionHeader title="Badge" />
+            <View style={styles.row}>
+              <Badge label="12 new" tone="success" />
+              <Badge label="Alert" tone="warning" />
+              <Badge label="Critical" tone="critical" />
+              <Badge label="10%" tone="info" />
+              <Badge label="zzz" tone="default" />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <SectionHeader title="StatusDot" />
+            <View style={styles.row}>
+              <StatusDot color={colors.success} />
+              <StatusDot color={colors.warning} />
+              <StatusDot color={colors.critical} />
+              <StatusDot color={colors.primary} />
+            </View>
+          </View>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Buttons" />
+          <GradientButton label="Primary" fullWidth style={styles.button} />
+          <GradientButton label="Secondary" variant="secondary" fullWidth style={styles.button} />
+          <GradientButton label="Ghost" variant="ghost" fullWidth style={styles.button} />
+          <GradientButton label="Loading" loading fullWidth style={styles.button} />
+        </Card>
+
+        <Card>
+          <SectionHeader title="Gauges & Sparkline" />
+          <View style={styles.section}>
+            <View style={styles.row}>
+              <RingGauge value={87} tone="primary" centerLabel="87%" centerCaption="Beds" />
+              <RingGauge value={42} tone="success" centerLabel="42%" centerCaption="RAM" />
+              <RingGauge value={19} tone="critical" centerLabel="19" centerCaption="Queue" />
+            </View>
+          </View>
+          <View style={styles.section}>
+            <View style={styles.rowWrap}>
+              <Sparkline data={[5, 9, 7, 12, 8, 14, 11, 16]} color={colors.primary} />
+              <Sparkline
+                data={[10, 8, 6, 9, 5, 4, 6, 3]}
+                color={colors.success}
+                height={40}
+                width={100}
+              />
+              <Sparkline data={[3, 7, 4, 9, 12, 10, 8, 11]} color={colors.warning} />
+            </View>
+          </View>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Stats" />
+          <View style={styles.rowWrap}>
+            <StatTile label="Patients today" value="1,284" />
+            <StatTile label="Avg wait" value="12m" tone={colors.success} />
+            <StatTile label="Over capacity" value="3" tone={colors.critical} />
+          </View>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Progress" />
+          <ProgressBar
+            label="ICU availability"
+            valueLabel="72%"
+            progress={0.72}
+            color={colors.primary}
+            style={styles.progress}
+          />
+          <ProgressBar
+            label="Bed occupancy"
+            valueLabel="58%"
+            progress={0.58}
+            color={colors.success}
+            style={styles.progress}
+          />
+          <ProgressBar
+            label="Queue length"
+            valueLabel="18%"
+            progress={0.18}
+            color={colors.critical}
+            style={styles.progress}
+          />
+        </Card>
+
+        <Card>
+          <SectionHeader title="Metric Card" />
+          <View style={styles.metricGrid}>
+            <MetricCard
+              icon="bed"
+              label="Occupied beds"
+              value="214"
+              delta="+6 this hour"
+              deltaTone="up"
+              spark={[10, 14, 12, 16, 15, 19, 18, 21]}
+              statusTone="success"
+            />
+            <MetricCard
+              icon="time"
+              label="Avg wait"
+              value="12m"
+              delta="-3 from peak"
+              deltaTone="down"
+              spark={[20, 16, 18, 14, 12, 10, 9, 8]}
+              statusTone="warning"
+            />
+          </View>
+        </Card>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  content: {
+    padding: Spacing.three,
+    gap: Spacing.three,
+  },
+  section: {
+    marginTop: Spacing.three,
+  },
+  button: {
+    marginBottom: Spacing.two,
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: Spacing.two,
+    marginTop: Spacing.two,
+  },
+  rowWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: Spacing.three,
+    marginTop: Spacing.three,
+  },
+  progress: {
+    marginBottom: Spacing.three,
+  },
+  metricGrid: {
+    marginTop: Spacing.three,
+    gap: Spacing.three,
+  },
+});
+
+export default ShowcaseGallery;
+</file>
+
+<file path="src/components/ui/sparkline.tsx">
+import { View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { LineChart, type lineDataItem } from "react-native-gifted-charts";
+import { Colors } from "@/constants/theme";
+
+interface SparklineProps {
+  data: number[];
+  color?: string;
+  height?: number;
+  width?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function Sparkline({
+  data,
+  color,
+  height = 40,
+  width = 100,
+  style,
+}: SparklineProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const lineData: lineDataItem[] = data.map((value) => ({ value }));
+  const lineColor = color ?? colors.primary;
+
+  return (
+    <View style={[{ width, height }, style]}>
+      <LineChart
+        data={lineData}
+        height={height}
+        width={width}
+        color={lineColor}
+        thickness={2}
+        curved
+        hideAxesAndRules
+        hideDataPoints
+        hideYAxisText
+        showYAxisIndices={false}
+        yAxisThickness={0}
+        xAxisThickness={0}
+        initialSpacing={0}
+        endSpacing={0}
+        adjustToWidth
+        disableScroll
+      />
+    </View>
+  );
+}
+</file>
+
+<file path="src/components/ui/stat-tile.tsx">
+import { StyleSheet, Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import { Colors } from "@/constants/theme";
+
+interface StatTileProps {
+  label: string;
+  value: string;
+  tone?: string;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function StatTile({ label, value, tone, style }: StatTileProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
+  return (
+    <View style={[styles.container, style]}>
+      <Text style={[styles.value, { color: tone ?? colors.text }]} numberOfLines={1}>
+        {value}
+      </Text>
+      <Text style={[styles.label, { color: colors.textSecondary }]} numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+  value: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  label: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+});
+</file>
+
+<file path="src/components/ui/status-dot.tsx">
+import { View, type StyleProp, type ViewStyle } from "react-native";
+
+interface StatusDotProps {
+  color: string;
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function StatusDot({ color, size = 8, style }: StatusDotProps) {
+  return (
+    <View
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: color,
+        },
+        style,
+      ]}
+    />
+  );
+}
+</file>
+
+<file path="src/components/tab-bar.tsx">
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { GlassView } from "expo-glass-effect";
+import { Colors, Radii, Spacing } from "@/constants/theme";
+
+const ICONS: Record<string, [string, string]> = {
+  dashboard: ["grid-outline", "grid"],
+  memory: ["medkit-outline", "medkit"],
+  assistant: ["chatbubble-ellipses-outline", "chatbubble-ellipses"],
+  analytics: ["stats-chart-outline", "stats-chart"],
+  more: ["ellipsis-horizontal-outline", "ellipsis-horizontal"],
+};
+
+const TAB_BADGE = 3;
+
+function TabBarItem({
+  name,
+  active,
+  onPress,
+}: {
+  name: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  const c = Colors.dark;
+  const [outline, filled] = ICONS[name];
+  return (
+    <Pressable onPress={onPress} style={styles.item} hitSlop={6}>
+      {name === "more" && TAB_BADGE > 0 ? (
+        <View style={styles.badgeWrap}>
+          <View style={styles.badgeDot} />
+        </View>
+      ) : null}
+      <Ionicons
+        name={active ? (filled as any) : (outline as any)}
+        size={22}
+        color={active ? c.primary : c.tabInactive}
+      />
+      <Text style={[styles.label, { color: active ? c.text : c.tabInactive }]} numberOfLines={1}>
+        {name === "memory" ? "Memory" : name.charAt(0).toUpperCase() + name.slice(1)}
+      </Text>
+    </Pressable>
+  );
+}
+
+export function FloatingTabBar({
+  state,
+  descriptors,
+  navigation,
+}: {
+  state: any;
+  descriptors: any;
+  navigation: any;
+}) {
+  const c = Colors.dark;
+  return (
+    <View style={styles.shell} pointerEvents="box-none">
+      <GlassView glassEffectStyle="regular" tintColor={c.cardElevated} style={styles.pill}>
+        {state.routes.map((route: any, i: number) => {
+          const { options } = descriptors[route.key];
+          const label = options.title ?? route.name;
+          const isFocused = state.index === i;
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
+          return (
+            <TabBarItem
+              key={route.key}
+              name={label.toLowerCase().replace(" ", "")}
+              active={isFocused}
+              onPress={onPress}
+            />
+          );
+        })}
+      </GlassView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  shell: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    paddingBottom: Spacing.two,
+    paddingHorizontal: Spacing.four,
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: Radii.pill,
+    backgroundColor: "rgba(19,26,42,0.85)",
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+    marginBottom: Spacing.two,
+  },
+  item: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+    paddingVertical: Spacing.one,
+  },
+  label: { fontSize: 10, fontWeight: "600" },
+  badgeWrap: { position: "absolute", top: 0, right: "28%", zIndex: 10 },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#F87171",
+    borderWidth: 1,
+    borderColor: "#131A2A",
+  },
+});
+</file>
+
+<file path="src/context/session.tsx">
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import type { Session, RoleId } from "@/utils/types";
+
+interface SessionContextValue {
+  session: Session | null;
+  signIn: (role: RoleId, hospital: string, userName: string) => void;
+  signOut: () => void;
+}
+
+const SessionContext = createContext<SessionContextValue | undefined>(undefined);
+
+export function SessionProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
+
+  const value = useMemo(
+    () => ({
+      session,
+      signIn: (role: RoleId, hospital: string, userName: string) =>
+        setSession({ role, hospital, userName }),
+      signOut: () => setSession(null),
+    }),
+    [session]
+  );
+
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+}
+
+export function useSession(): SessionContextValue {
+  const ctx = useContext(SessionContext);
+  if (!ctx) throw new Error("useSession must be used within a SessionProvider");
+  return ctx;
+}
+</file>
+
+<file path="src/data/bloodBank.json">
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T07:30:00Z",
+    "hospital": "MedNexus General Hospital"
+  },
+  "entries": [
+    {
+      "id": "BB-A+",
+      "group": "A+",
+      "unit": 24,
+      "capacity": 40
+    },
+    {
+      "id": "BB-A-",
+      "group": "A-",
+      "unit": 6,
+      "capacity": 20
+    },
+    {
+      "id": "BB-B+",
+      "group": "B+",
+      "unit": 31,
+      "capacity": 40
+    },
+    {
+      "id": "BB-B-",
+      "group": "B-",
+      "unit": 9,
+      "capacity": 20
+    },
+    {
+      "id": "BB-O+",
+      "group": "O+",
+      "unit": 36,
+      "capacity": 50
+    },
+    {
+      "id": "BB-O-",
+      "group": "O-",
+      "unit": 11,
+      "capacity": 25
+    },
+    {
+      "id": "BB-AB+",
+      "group": "AB+",
+      "unit": 7,
+      "capacity": 15
+    },
+    {
+      "id": "BB-AB-",
+      "group": "AB-",
+      "unit": 3,
+      "capacity": 10
+    }
+  ]
+}
+</file>
+
+<file path="src/data/predictions.json">
+{
+  "metadata": {
+    "generatedAt": "2026-09-03T08:00:00Z",
+    "confidenceLabel": "Moderate-High Confidence"
+  },
+  "predictions": [
+    {
+      "id": "PRED-001",
+      "title": "Bed demand",
+      "value": "189 beds",
+      "delta": "+9 vs today",
+      "direction": "up",
+      "over": "next 24h",
+      "confidence": 0.86,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-002",
+      "title": "ER admissions",
+      "value": "52 visits",
+      "delta": "+7 vs average",
+      "direction": "up",
+      "over": "next 24h",
+      "confidence": 0.78,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-003",
+      "title": "ICU load",
+      "value": "23 beds",
+      "delta": "-2 vs today",
+      "direction": "down",
+      "over": "next 24h",
+      "confidence": 0.81,
+      "period": "24 hours"
+    },
+    {
+      "id": "PRED-004",
+      "title": "Pharmacy stock",
+      "value": "Adequate",
+      "delta": "3 items flagged",
+      "direction": "flat",
+      "over": "next 48h",
+      "confidence": 0.72,
+      "period": "48 hours"
+    }
+  ]
+}
+</file>
+
+<file path="src/data/resourceRecommendations.json">
+{
+  "metadata": {
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "recommendations": [
+    {
+      "id": "REC-001",
+      "category": "ICU Beds",
+      "title": "Open 2 overflow ICU beds",
+      "detail": "Predicted ICU load may exceed current capacity within 12 hours. Open overflow bays 4A and 4B.",
+      "savings": "Avoids ~$4.2k in transfer costs",
+      "impact": "high",
+      "applied": false
+    },
+    {
+      "id": "REC-002",
+      "category": "Pharmacy",
+      "title": "Reorder Atorvastatin 20mg",
+      "detail": "Stock at ~13% of normal. Place a standing order to avoid a 3-day gap.",
+      "savings": "Prevents $1.1k in emergency sourcing",
+      "impact": "medium",
+      "applied": false
+    },
+    {
+      "id": "REC-003",
+      "category": "Staffing",
+      "title": "Add 1 ER charge nurse for evening shift",
+      "detail": "Forecasted ER volume increase supports an additional charge nurse from 17:00 to 23:00.",
+      "savings": "Improves throughput and reduces wait times",
+      "impact": "high",
+      "applied": true
+    }
+  ]
+}
+</file>
+
+<file path="src/data/staff.json">
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T06:00:00Z",
+    "shift": "morning"
+  },
+  "staff": [
+    {
+      "id": "STF-001",
+      "name": "Dr. Marcus Chen",
+      "role": "Consultant",
+      "department": "Cardiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.9,
+      "avatarColor": "#2563EB"
+    },
+    {
+      "id": "STF-002",
+      "name": "Dr. Priya Sharma",
+      "role": "Resident",
+      "department": "Cardiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.8,
+      "avatarColor": "#7C3AED"
+    },
+    {
+      "id": "STF-003",
+      "name": "Nurse Elena Rossi",
+      "role": "Charge Nurse",
+      "department": "ER",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.95,
+      "avatarColor": "#DC2626"
+    },
+    {
+      "id": "STF-004",
+      "name": "Dr. James Okafor",
+      "role": "Consultant",
+      "department": "ER",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#059669"
+    },
+    {
+      "id": "STF-005",
+      "name": "Nurse Aisha Bello",
+      "role": "Charge Nurse",
+      "department": "ICU",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.85,
+      "avatarColor": "#D97706"
+    },
+    {
+      "id": "STF-006",
+      "name": "Dr. Henrik Larsen",
+      "role": "Consultant",
+      "department": "ICU",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.75,
+      "avatarColor": "#0891B2"
+    },
+    {
+      "id": "STF-007",
+      "name": "Pharmacist Sofia Duarte",
+      "role": "Pharmacist",
+      "department": "Pharmacy",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#9333EA"
+    },
+    {
+      "id": "STF-008",
+      "name": "Pharmacist Daniel Kim",
+      "role": "Pharmacist",
+      "department": "Pharmacy",
+      "shift": "afternoon",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#4F46E5"
+    },
+    {
+      "id": "STF-009",
+      "name": "Dr. Rachel Nguyen",
+      "role": "Consultant",
+      "department": "Radiology",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.9,
+      "avatarColor": "#0EA5E9"
+    },
+    {
+      "id": "STF-010",
+      "name": "Tech Omar Haddad",
+      "role": "Radiology Tech",
+      "department": "Radiology",
+      "shift": "night",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#16A34A"
+    },
+    {
+      "id": "STF-011",
+      "name": "Dr. Grace Mensah",
+      "role": "Consultant",
+      "department": "Surgery",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.7,
+      "avatarColor": "#DB2777"
+    },
+    {
+      "id": "STF-012",
+      "name": "Scrub Nurse Liam Foley",
+      "role": "Scrub Nurse",
+      "department": "Surgery",
+      "shift": "morning",
+      "onDuty": true,
+      "available": 0.8,
+      "avatarColor": "#7C3AED"
+    },
+    {
+      "id": "STF-013",
+      "name": "Lab Supervisor Camila Reyes",
+      "role": "Lab Supervisor",
+      "department": "Lab",
+      "shift": "morning",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#F59E0B"
+    },
+    {
+      "id": "STF-014",
+      "name": "Dr. Nathan Brooks",
+      "role": "Resident",
+      "department": "ICU",
+      "shift": "night",
+      "onDuty": false,
+      "available": 0,
+      "avatarColor": "#EF4444"
+    }
+  ]
+}
+</file>
+
+<file path="src/data/theatreSchedule.json">
+{
+  "metadata": {
+    "date": "2026-09-03",
+    "hospital": "MedNexus General Hospital"
+  },
+  "slots": [
+    {
+      "id": "TH-01",
+      "theatre": "Theatre 1",
+      "procedure": "Laparoscopic Cholecystectomy",
+      "surgeon": "Dr. Grace Mensah",
+      "time": "08:00",
+      "durationMin": 90,
+      "status": "in-progress"
+    },
+    {
+      "id": "TH-02",
+      "theatre": "Theatre 2",
+      "procedure": "Cemented Hemiarthroplasty",
+      "surgeon": "Dr. Nathan Brooks",
+      "time": "08:30",
+      "durationMin": 120,
+      "status": "scheduled"
+    },
+    {
+      "id": "TH-03",
+      "theatre": "Theatre 3",
+      "procedure": "Emergency Appendectomy",
+      "surgeon": "Dr. Priya Sharma",
+      "time": "09:15",
+      "durationMin": 75,
+      "status": "delayed"
+    },
+    {
+      "id": "TH-04",
+      "theatre": "Theatre 1",
+      "procedure": "Inguinal Hernia Repair",
+      "surgeon": "Dr. James Okafor",
+      "time": "11:00",
+      "durationMin": 80,
+      "status": "scheduled"
+    },
+    {
+      "id": "TH-05",
+      "theatre": "Theatre 4",
+      "procedure": "Cataract Extraction with IOL",
+      "surgeon": "Dr. Rachel Nguyen",
+      "time": "13:30",
+      "durationMin": 60,
+      "status": "scheduled"
+    }
+  ]
+}
+</file>
+
+<file path="src/utils/types.ts">
+/**
+ * MedNexus AI — shared domain types.
+ * Screens and synthetic data import from here so the contracts stay in one place.
+ * Field names here MUST match the shapes in src/data/*.json.
+ */
+
+export type RoleId =
+  | "admin"
+  | "doctor"
+  | "nurse"
+  | "pharmacist"
+  | "lab_scientist"
+  | "finance_officer";
+
+export interface Role {
+  id: RoleId;
+  label: string;
+  icon: string;
+}
+
+export interface Session {
+  role: RoleId;
+  hospital: string;
+  userName: string;
+}
+
+export interface DailyAdmissionData {
+  date: string;
+  admissions: number;
+  discharges: number;
+  occupancy: number;
+  icuOccupancy: number;
+  emergencyVisits: number;
+}
+
+export interface MedicineStock {
+  id: string;
+  name: string;
+  category: string;
+  currentStock: number;
+  unit: string;
+  monthlyUsageHistory: number[];
+  reorderPoint: number;
+  supplier?: string;
+}
+
+export interface PastCase {
+  id: string;
+  patientAge: number;
+  patientGender: string;
+  admissionDate: string;
+  dischargeDate: string | null;
+  symptoms: string[];
+  diagnosis: string;
+  treatment: string;
+  outcome: string;
+  tags: string[];
+}
+
+export interface BloodBankEntry {
+  id: string;
+  group: string;
+  unit: number;
+  capacity: number;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  shift: "morning" | "afternoon" | "night";
+  onDuty: boolean;
+  available: number; // 0..1 availability this period
+  avatarColor: string;
+}
+
+export type TheatreStatus = "scheduled" | "in-progress" | "delayed";
+
+export interface TheatreSlot {
+  id: string;
+  theatre: string;
+  procedure: string;
+  surgeon: string;
+  time: string;
+  durationMin: number;
+  status: TheatreStatus;
+}
+
+export interface PredictionItem {
+  id: string;
+  title: string;
+  value: string;
+  delta: string;
+  direction: "up" | "down" | "flat";
+  over: string;
+  confidence: number;
+  period: string;
+}
+
+export interface Recommendation {
+  id: string;
+  category: string;
+  title: string;
+  detail: string;
+  savings: string;
+  impact: "high" | "medium" | "low";
+  applied: boolean;
+}
+</file>
+
+<file path="eslint.config.js">
+// https://docs.expo.dev/guides/using-eslint/
+const { defineConfig } = require('eslint/config');
+const expoConfig = require("eslint-config-expo/flat");
+
+module.exports = defineConfig([
+  expoConfig,
+  {
+    ignores: ["dist/*"],
+  }
+]);
+</file>
+
+<file path=".claude/settings.json">
+{
+  "enabledPlugins": {
+    "expo@claude-plugins-official": true
+  }
+}
+</file>
+
+<file path="assets/expo.icon/Assets/expo-symbol 2.svg">
+<svg width="652" height="606" viewBox="0 0 652 606" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M353.554 0H298.446C273.006 0 249.684 14.6347 237.962 37.9539L4.37994 502.646C-1.04325 513.435 -1.45067 526.178 3.2716 537.313L22.6123 582.918C34.6475 611.297 72.5404 614.156 88.4414 587.885L309.863 222.063C313.34 216.317 319.439 212.826 326 212.826C332.561 212.826 338.659 216.317 342.137 222.063L563.559 587.885C579.46 614.156 617.352 611.297 629.388 582.918L648.728 537.313C653.451 526.178 653.043 513.435 647.62 502.646L414.038 37.9539C402.316 14.6347 378.994 0 353.554 0Z" fill="white"/>
+</svg>
+</file>
+
+<file path="assets/expo.icon/icon.json">
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.00000,0.47843,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "expo-symbol 2.svg",
+          "name" : "expo-symbol 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              1.1008400065293245e-05,
+              -16.046875
+            ]
+          }
+        },
+        {
+          "image-name" : "grid.png",
+          "name" : "grid"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
+</file>
+
+<file path="scripts/reset-project.js">
+#!/usr/bin/env node
+
+/**
+ * This script is used to reset the project to a blank state.
+ * It deletes or moves the /src and /scripts directories to /example based on user input and creates a new /src/app directory with an index.tsx and _layout.tsx file.
+ * You can remove the `reset-project` script from package.json and safely delete this file after running it.
+ */
+
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
+
+const root = process.cwd();
+const oldDirs = ["src", "scripts"];
+const exampleDir = "example";
+const newAppDir = "src/app";
+const exampleDirPath = path.join(root, exampleDir);
+
+const indexContent = `import { Text, View, StyleSheet } from "react-native";
+
+export default function Index() {
+  return (
+    <View style={styles.container}>
+      <Text>Edit src/app/index.tsx to edit this screen.</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+`;
+
+const layoutContent = `import { Stack } from "expo-router";
+
+export default function RootLayout() {
+  return <Stack />;
+}
+`;
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const moveDirectories = async (userInput) => {
+  try {
+    if (userInput === "y") {
+      // Create the app-example directory
+      await fs.promises.mkdir(exampleDirPath, { recursive: true });
+      console.log(`📁 /${exampleDir} directory created.`);
+    }
+
+    // Move old directories to new app-example directory or delete them
+    for (const dir of oldDirs) {
+      const oldDirPath = path.join(root, dir);
+      if (fs.existsSync(oldDirPath)) {
+        if (userInput === "y") {
+          const newDirPath = path.join(root, exampleDir, dir);
+          await fs.promises.rename(oldDirPath, newDirPath);
+          console.log(`➡️ /${dir} moved to /${exampleDir}/${dir}.`);
+        } else {
+          await fs.promises.rm(oldDirPath, { recursive: true, force: true });
+          console.log(`❌ /${dir} deleted.`);
+        }
+      } else {
+        console.log(`➡️ /${dir} does not exist, skipping.`);
+      }
+    }
+
+    // Create new /src/app directory
+    const newAppDirPath = path.join(root, newAppDir);
+    await fs.promises.mkdir(newAppDirPath, { recursive: true });
+    console.log("\n📁 New /src/app directory created.");
+
+    // Create index.tsx
+    const indexPath = path.join(newAppDirPath, "index.tsx");
+    await fs.promises.writeFile(indexPath, indexContent);
+    console.log("📄 src/app/index.tsx created.");
+
+    // Create _layout.tsx
+    const layoutPath = path.join(newAppDirPath, "_layout.tsx");
+    await fs.promises.writeFile(layoutPath, layoutContent);
+    console.log("📄 src/app/_layout.tsx created.");
+
+    console.log("\n✅ Project reset complete. Next steps:");
+    console.log(
+      `1. Run \`npx expo start\` to start a development server.\n2. Edit src/app/index.tsx to edit the main screen.\n3. Put all your application code in /src, only screens and layout files should be in /src/app.${
+        userInput === "y"
+          ? `\n4. Delete the /${exampleDir} directory when you're done referencing it.`
+          : ""
+      }`
+    );
+  } catch (error) {
+    console.error(`❌ Error during script execution: ${error.message}`);
+  }
+};
+
+rl.question(
+  "Do you want to move existing files to /example instead of deleting them? (Y/n): ",
+  (answer) => {
+    const userInput = answer.trim().toLowerCase() || "y";
+    if (userInput === "y" || userInput === "n") {
+      moveDirectories(userInput).finally(() => rl.close());
+    } else {
+      console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
+      rl.close();
+    }
+  }
+);
+</file>
+
+<file path="src/app/(tabs)/_layout.tsx">
+import { Tabs } from "expo-router";
+import { Colors } from "@/constants/theme";
+import { FloatingTabBar } from "@/components/tab-bar";
+
+export default function TabLayout() {
+  return (
+    <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: { backgroundColor: Colors.dark.background },
+      }}
+    >
+      <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Tabs.Screen name="memory" options={{ title: "Memory" }} />
+      <Tabs.Screen name="assistant" options={{ title: "Assistant" }} />
+      <Tabs.Screen name="analytics" options={{ title: "Analytics" }} />
+      <Tabs.Screen name="more" options={{ title: "More" }} />
+    </Tabs>
+  );
+}
+</file>
+
+<file path="src/app/(tabs)/dashboard.tsx">
+import { useMemo, useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Colors, Radii, Spacing } from "@/constants/theme";
+import { useSession } from "@/context/session";
+import {
+  Card,
+  SectionHeader,
+  RingGauge,
+  MetricCard,
+  GradientButton,
+  Badge,
+  ProgressBar,
+  StatTile,
+  Sparkline,
+} from "@/components/ui";
+import admissionsData from "@/data/admissions.json";
+import bloodBankData from "@/data/bloodBank.json";
+import staffData from "@/data/staff.json";
+import theatreData from "@/data/theatreSchedule.json";
+import predictionsData from "@/data/predictions.json";
+import recommendationsData from "@/data/resourceRecommendations.json";
+import {
+  capacityPercent,
+  formatCapacity,
+  trendDirection,
+} from "@/utils/predictions";
+
+const c = Colors.dark;
+
+export default function DashboardScreen() {
+  const { session } = useSession();
+
+  const daily = admissionsData.dailyData;
+  const last = daily[daily.length - 1];
+  const occupancyPct = capacityPercent(last.occupancy);
+  const icuPct = Math.round((last.icuOccupancy / 30) * 100);
+
+  const occupancySeries = daily.map((d) => d.occupancy);
+  const erSeries = daily.map((d) => d.emergencyVisits);
+
+  const bloodReserve = useMemo(
+    () =>
+      bloodBankData.entries.map((e) => ({
+        ...e,
+        pct: Math.round((e.unit / e.capacity) * 100),
+      })),
+    []
+  );
+
+  const onDuty = staffData.staff.filter((s) => s.onDuty);
+  const staffByDept: Record<string, number> = {};
+  for (const s of onDuty) staffByDept[s.department] = (staffByDept[s.department] ?? 0) + 1;
+
+  const availability = onDuty.slice(0, 5);
+
+  const [recommendations, setRecommendations] = useState(
+    recommendationsData.recommendations
+  );
+
+  const statusToneFor = (v: number) =>
+    v >= 85 ? "critical" : v >= 60 ? "warning" : "success";
+
+  const erTrend = trendDirection(erSeries);
+  const erDeltaTone = erTrend === "flat" ? "neutral" : erTrend;
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Greeting header */}
+        <View style={styles.header}>
+          <View style={styles.greetingBlock}>
+            <Text style={[styles.greeting, { color: c.textSecondary }]}>Good evening,</Text>
+            <Text style={[styles.userName, { color: c.text }]} numberOfLines={1}>
+              {session?.userName ?? "Daniel Chen"}
+            </Text>
+            <Text style={[styles.hospital, { color: c.textMuted }]} numberOfLines={1}>
+              {session?.hospital ?? "St. Meridian General"}
+            </Text>
+          </View>
+          <View style={styles.headerRight}>
+            <View style={styles.livePill}>
+              <View style={[styles.liveDot, { backgroundColor: c.success }]} />
+              <Text style={[styles.liveText, { color: c.success }]}>LIVE</Text>
+            </View>
+            <TouchableOpacity style={[styles.bellBtn, { backgroundColor: c.card }]}>
+              <Ionicons name="notifications-outline" size={20} color={c.text} />
+              <View style={[styles.bellDot, { backgroundColor: c.critical }]} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Ring gauge card: Beds / ICU / ER queue */}
+        <Card style={styles.gaugeCard}>
+          <SectionHeader
+            title="Capacity Overview"
+            subtitle={`Updated ${formatCapacity(occupancyPct)} · live`}
+            right={<Badge label="Live ops" tone="success" />}
+          />
+          <View style={styles.gaugeRow}>
+            <RingGauge
+              value={occupancyPct}
+              size={112}
+              strokeWidth={9}
+              tone={statusToneFor(occupancyPct) as any}
+              centerLabel={`${occupancyPct}%`}
+              centerCaption="Bed occ"
+            />
+            <RingGauge
+              value={icuPct}
+              size={112}
+              strokeWidth={9}
+              tone={icuPct >= 75 ? ("warning" as any) : ("primary" as any)}
+              centerLabel={`${icuPct}%`}
+              centerCaption="ICU"
+            />
+            <RingGauge
+              value={100}
+              size={112}
+              strokeWidth={9}
+              tone="warning"
+              centerLabel={`${last.emergencyVisits}`}
+              centerCaption="ER queue"
+            />
+          </View>
+
+          {/* Blood bank reserve row */}
+          <View style={styles.bloodHeader}>
+            <Text style={[styles.bloodTitle, { color: c.text }]}>Blood Bank Reserve</Text>
+            <Sparkline data={erSeries} height={22} width={64} color={c.critical} />
+          </View>
+          <View style={styles.bloodRow}>
+            {bloodReserve.slice(0, 8).map((e) => (
+              <StatTile
+                key={e.id}
+                label={e.group}
+                value={`${e.unit}`}
+                tone={e.pct < 40 ? c.critical : e.pct < 60 ? c.warning : c.success}
+                style={styles.bloodTile}
+              />
+            ))}
+          </View>
+        </Card>
+
+        {/* Operations metric cards */}
+        <SectionHeader
+          title="Operations"
+          subtitle="Live metrics across the hospital"
+          right={<Badge label="4 live" tone="info" />}
+          style={styles.section}
+        />
+        <View style={styles.opsGrid}>
+          <MetricCard
+            icon="bed-outline"
+            label="Bed occupancy"
+            value={`${formatCapacity(occupancyPct)}`}
+            delta={`${last.occupancy}/200 beds`}
+            deltaTone="neutral"
+            statusTone={statusToneFor(occupancyPct)}
+            spark={occupancySeries.slice(-9)}
+          />
+          <MetricCard
+            icon="pulse-outline"
+            label="ER admissions"
+            value={`${last.admissions}`}
+            delta={`${trendDirection(erSeries) === "up" ? "+" : ""}${Math.round(
+              (erSeries[erSeries.length - 1] / erSeries[0] - 1) * 100
+            )}% vs trend`}
+            deltaTone={erDeltaTone}
+            statusTone="warning"
+            spark={erSeries.slice(-9)}
+          />
+          <MetricCard
+            icon="people-outline"
+            label="On duty"
+            value={`${onDuty.length}`}
+            delta="across 5 depts"
+            deltaTone="neutral"
+            statusTone="success"
+            spark={occupancySeries.slice(-6)}
+          />
+          <MetricCard
+            icon="medical-outline"
+            label="Pharmacy alerts"
+            value={`3`}
+            delta="needs review"
+            deltaTone="down"
+            statusTone="critical"
+            spark={[4, 4, 3, 5, 3, 3, 3]}
+          />
+        </View>
+
+        {/* AI Predictions */}
+        <SectionHeader
+          title="AI Predictions"
+          subtitle="Confidence-scored forecasts"
+          right={<Badge label="Next 24–48h" tone="info" />}
+          style={styles.section}
+        />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.predictionRow}
+        >
+          {predictionsData.predictions.map((p) => (
+            <Card key={p.id} style={styles.predictionCard}>
+              <View style={styles.predictTop}>
+                <Text style={[styles.predictTitle, { color: c.textSecondary }]}>{p.title}</Text>
+                <Ionicons
+                  name={
+                    p.direction === "up"
+                      ? "trending-up"
+                      : p.direction === "down"
+                        ? "trending-down"
+                        : "remove"
+                  }
+                  size={16}
+                  color={
+                    p.direction === "up" ? c.critical : p.direction === "down" ? c.success : c.textMuted
+                  }
+                />
+              </View>
+              <Text style={[styles.predictValue, { color: c.text }]}>{p.value}</Text>
+              <Text style={[styles.predictDelta, { color: c.textSecondary }]}>
+                {p.delta} · {p.over}
+              </Text>
+              <View style={styles.confidenceRow}>
+                <ProgressBar
+                  label="Confidence"
+                  valueLabel={`${Math.round(p.confidence * 100)}%`}
+                  progress={p.confidence}
+                  color={
+                    p.confidence >= 0.8 ? c.success : p.confidence >= 0.7 ? c.warning : c.critical
+                  }
+                  height={6}
+                  style={styles.confidenceBar}
+                />
+              </View>
+            </Card>
+          ))}
+        </ScrollView>
+
+        {/* Smart Resource Allocation */}
+        <SectionHeader
+          title="Smart Resource Allocation"
+          subtitle="AI-suggested actions"
+          right={<Badge label="Live" tone="success" />}
+          style={styles.section}
+        />
+        <View style={styles.resourceList}>
+          {recommendations.map((r) => (
+            <Card key={r.id} style={[styles.resourceCard, r.applied && styles.resourceApplied]}>
+              <View style={styles.resourceTop}>
+                <View style={styles.resourceCatRow}>
+                  <Badge label={r.category} tone="info" />
+                  <Badge
+                    label={r.impact}
+                    tone={r.impact === "high" ? "critical" : r.impact === "medium" ? "warning" : "info"}
+                  />
+                </View>
+                {r.applied ? <Badge label="Applied" tone="success" /> : null}
+              </View>
+              <Text style={[styles.resourceTitle, { color: c.text }]}>{r.title}</Text>
+              <Text style={[styles.resourceDetail, { color: c.textSecondary }]}>{r.detail}</Text>
+              <Text style={[styles.resourceSavings, { color: c.success }]}>{r.savings}</Text>
+              <View style={styles.resourceActions}>
+                <GradientButton
+                  label="Apply"
+                  icon="checkmark"
+                  variant={r.applied ? "secondary" : "primary"}
+                  onPress={() =>
+                    setRecommendations((prev) =>
+                      prev.map((x) => (x.id === r.id ? { ...x, applied: !x.applied } : x))
+                    )
+                  }
+                  style={styles.resourceBtn}
+                />
+                {!r.applied ? (
+                  <GradientButton
+                    label="Dismiss"
+                    icon="close"
+                    variant="ghost"
+                    onPress={() =>
+                      setRecommendations((prev) => prev.filter((x) => x.id !== r.id))
+                    }
+                    style={styles.resourceBtn}
+                  />
+                ) : null}
+              </View>
+            </Card>
+          ))}
+        </View>
+
+        {/* Theatre Schedule */}
+        <SectionHeader
+          title="Theatre Schedule"
+          subtitle="Today · 5 procedures"
+          style={styles.section}
+        />
+        <Card>
+          {theatreData.slots.map((s, i) => (
+            <View
+              key={s.id}
+              style={[styles.theatreRow, i < theatreData.slots.length - 1 && styles.theatreDivider]}
+            >
+              <View style={[styles.theatreTimeWrap, { borderColor: c.border }]}>
+                <Text style={[styles.theatreTime, { color: c.text }]}>{s.time}</Text>
+                <Text style={[styles.theatreName, { color: c.textMuted }]}>{s.theatre}</Text>
+              </View>
+              <View style={styles.theatreBody}>
+                <Text style={[styles.theatreProcedure, { color: c.text }]} numberOfLines={1}>
+                  {s.procedure}
+                </Text>
+                <Text style={[styles.theatreSurgeon, { color: c.textSecondary }]}>
+                  {s.surgeon} · {s.durationMin} min
+                </Text>
+              </View>
+              <Badge
+                label={s.status}
+                tone={
+                  s.status === "in-progress"
+                    ? "success"
+                    : s.status === "delayed"
+                      ? "critical"
+                      : "default"
+                }
+              />
+            </View>
+          ))}
+        </Card>
+
+        {/* Staff Availability */}
+        <SectionHeader
+          title="Staff Availability"
+          subtitle="Shift coverage by duty"
+          right={<Badge label={`${onDuty.length} on duty`} tone="success" />}
+          style={styles.section}
+        />
+        <Card>
+          <View style={styles.staffDeptRow}>
+            {Object.entries(staffByDept).map(([dept, count]) => (
+              <StatTile key={dept} label={dept} value={`${count}`} style={styles.deptTile} />
+            ))}
+          </View>
+          <View style={styles.staffBarList}>
+            {availability.map((s) => (
+              <ProgressBar
+                key={s.id}
+                label={s.name}
+                valueLabel={`${s.role}`}
+                progress={Math.max(0.15, s.available)}
+                color={s.avatarColor}
+                style={styles.staffBar}
+              />
+            ))}
+          </View>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
+  content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.three },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.two,
+  },
+  greetingBlock: { flex: 1 },
+  greeting: { fontSize: 13, fontWeight: "500" },
+  userName: { fontSize: 20, fontWeight: "700", marginTop: 2 },
+  hospital: { fontSize: 12, marginTop: 2 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: Spacing.two },
+  livePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.one,
+    backgroundColor: `${c.success}18`,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: Radii.pill,
+  },
+  liveDot: { width: 6, height: 6, borderRadius: 3 },
+  liveText: { fontSize: 11, fontWeight: "700" },
+  bellBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: Radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bellDot: {
+    position: "absolute",
+    top: 8,
+    right: 9,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: c.background,
+  },
+
+  gaugeCard: { gap: Spacing.three },
+  gaugeRow: { flexDirection: "row", justifyContent: "space-between" },
+
+  bloodHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  bloodTitle: { fontSize: 14, fontWeight: "600" },
+  bloodRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
+  bloodTile: { width: "22%", marginBottom: Spacing.one },
+
+  section: { marginTop: Spacing.two },
+  opsGrid: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two, justifyContent: "space-between" },
+  opsCard: { flexBasis: "48%" },
+
+  predictionRow: { gap: Spacing.two, paddingRight: Spacing.one },
+  predictionCard: { width: 220, gap: Spacing.two },
+  predictTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  predictTitle: { fontSize: 12, fontWeight: "600" },
+  predictValue: { fontSize: 24, fontWeight: "700" },
+  predictDelta: { fontSize: 12 },
+  confidenceRow: { marginTop: Spacing.one },
+  confidenceBar: { marginTop: Spacing.two },
+
+  resourceList: { gap: Spacing.two },
+  resourceCard: { gap: Spacing.two },
+  resourceApplied: { opacity: 0.7 },
+  resourceTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  resourceCatRow: { flexDirection: "row", gap: Spacing.one },
+  resourceTitle: { fontSize: 16, fontWeight: "700" },
+  resourceDetail: { fontSize: 13, lineHeight: 18 },
+  resourceSavings: { fontSize: 12, fontWeight: "600" },
+  resourceActions: { flexDirection: "row", gap: Spacing.two, marginTop: Spacing.one },
+  resourceBtn: { flex: 1 },
+
+  theatreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  theatreDivider: { borderBottomWidth: 1, borderBottomColor: c.border },
+  theatreTimeWrap: {
+    width: 56,
+    height: 44,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  theatreTime: { fontSize: 13, fontWeight: "700" },
+  theatreName: { fontSize: 10, marginTop: 1 },
+  theatreBody: { flex: 1 },
+  theatreProcedure: { fontSize: 14, fontWeight: "600" },
+  theatreSurgeon: { fontSize: 11, marginTop: 2 },
+
+  staffDeptRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.three, marginBottom: Spacing.three },
+  deptTile: { width: 72 },
+  staffBarList: { gap: Spacing.two },
+  staffBar: { marginTop: Spacing.one },
+});
+</file>
+
+<file path="src/components/external-link.tsx">
+import { Href, Link } from 'expo-router';
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
+import { type ComponentProps } from 'react';
+
+type Props = Omit<ComponentProps<typeof Link>, 'href'> & { href: Href & string };
+
+export function ExternalLink({ href, ...rest }: Props) {
+  return (
+    <Link
+      target="_blank"
+      {...rest}
+      href={href}
+      onPress={async (event) => {
+        if (process.env.EXPO_OS !== 'web') {
+          // Prevent the default behavior of linking to the default browser on native.
+          event.preventDefault();
+          // Open the link in an in-app browser.
+          await openBrowserAsync(href, {
+            presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
+          });
+        }
+      }}
+    />
+  );
+}
+</file>
+
+<file path="src/components/skeleton.tsx">
+import { useEffect } from "react";
+import type { ViewStyle } from "react-native";
+import Animated, {
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  useAnimatedStyle,
+  Easing,
+} from "react-native-reanimated";
+
+type SkeletonProps = {
+  width?: number | `${number}%`;
+  height?: number;
+  radius?: number;
+  style?: ViewStyle | ViewStyle[];
+  dark?: boolean;
+};
+
+/**
+ * A pulsing placeholder block used while data is loading.
+ * Reusable across dashboard cards and search results.
+ */
+export function Skeleton({
+  width = "100%",
+  height = 14,
+  radius = 6,
+  style,
+  dark = false,
+}: SkeletonProps) {
+  const opacity = useSharedValue(dark ? 0.4 : 0.35);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withTiming(dark ? 0.15 : 0.1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+  }, [opacity, dark]);
+
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          borderRadius: radius,
+          backgroundColor: dark ? "#334155" : "#E2E8F0",
+        },
+        animatedStyle,
+        style,
+      ]}
+    />
+  );
+}
+</file>
+
+<file path="src/data/admissions.json">
+{
+  "metadata": {
+    "hospitalName": "MedNexus General Hospital",
+    "totalBeds": 200,
+    "currentOccupancy": 170,
+    "period": "2026-08-21 to 2026-09-03",
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "dailyData": [
+    {
+      "date": "2026-08-21",
+      "admissions": 14,
+      "discharges": 11,
+      "occupancy": 168,
+      "icuOccupancy": 18,
+      "emergencyVisits": 42
+    },
+    {
+      "date": "2026-08-22",
+      "admissions": 11,
+      "discharges": 9,
+      "occupancy": 170,
+      "icuOccupancy": 19,
+      "emergencyVisits": 38
+    },
+    {
+      "date": "2026-08-23",
+      "admissions": 16,
+      "discharges": 13,
+      "occupancy": 173,
+      "icuOccupancy": 21,
+      "emergencyVisits": 51
+    },
+    {
+      "date": "2026-08-24",
+      "admissions": 9,
+      "discharges": 12,
+      "occupancy": 170,
+      "icuOccupancy": 17,
+      "emergencyVisits": 35
+    },
+    {
+      "date": "2026-08-25",
+      "admissions": 13,
+      "discharges": 8,
+      "occupancy": 175,
+      "icuOccupancy": 20,
+      "emergencyVisits": 44
+    },
+    {
+      "date": "2026-08-26",
+      "admissions": 17,
+      "discharges": 14,
+      "occupancy": 178,
+      "icuOccupancy": 22,
+      "emergencyVisits": 48
+    },
+    {
+      "date": "2026-08-27",
+      "admissions": 12,
+      "discharges": 15,
+      "occupancy": 175,
+      "icuOccupancy": 19,
+      "emergencyVisits": 39
+    },
+    {
+      "date": "2026-08-28",
+      "admissions": 15,
+      "discharges": 11,
+      "occupancy": 179,
+      "icuOccupancy": 23,
+      "emergencyVisits": 46
+    },
+    {
+      "date": "2026-08-29",
+      "admissions": 10,
+      "discharges": 13,
+      "occupancy": 176,
+      "icuOccupancy": 18,
+      "emergencyVisits": 37
+    },
+    {
+      "date": "2026-08-30",
+      "admissions": 18,
+      "discharges": 12,
+      "occupancy": 182,
+      "icuOccupancy": 24,
+      "emergencyVisits": 53
+    },
+    {
+      "date": "2026-08-31",
+      "admissions": 8,
+      "discharges": 14,
+      "occupancy": 176,
+      "icuOccupancy": 17,
+      "emergencyVisits": 33
+    },
+    {
+      "date": "2026-09-01",
+      "admissions": 14,
+      "discharges": 10,
+      "occupancy": 180,
+      "icuOccupancy": 21,
+      "emergencyVisits": 45
+    },
+    {
+      "date": "2026-09-02",
+      "admissions": 12,
+      "discharges": 15,
+      "occupancy": 177,
+      "icuOccupancy": 20,
+      "emergencyVisits": 41
+    },
+    {
+      "date": "2026-09-03",
+      "admissions": 13,
+      "discharges": 10,
+      "occupancy": 180,
+      "icuOccupancy": 22,
+      "emergencyVisits": 47
+    }
+  ],
+  "summary": {
+    "averageDailyAdmissions": 13.1,
+    "averageDailyDischarges": 11.9,
+    "peakOccupancy": 182,
+    "lowOccupancy": 168,
+    "averageOccupancy": 175.4,
+    "bedUtilizationRate": 87.7,
+    "averageIcuOccupancy": 20.1,
+    "totalAdmissions": 183,
+    "totalDischarges": 167,
+    "netPatientChange": 16
+  }
+}
+</file>
+
+<file path="src/data/medicineStock.json">
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T08:00:00Z",
+    "pharmacy": "MedNexus Central Pharmacy",
+    "alertThreshold": 20
+  },
+  "medicines": [
+    {
+      "id": "MED-001",
+      "name": "Amoxicillin 500mg",
+      "category": "Antibiotic",
+      "currentStock": 342,
+      "unit": "capsules",
+      "monthlyUsageHistory": [287, 301, 318],
+      "reorderPoint": 150,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-002",
+      "name": "Metformin 850mg",
+      "category": "Antidiabetic",
+      "currentStock": 580,
+      "unit": "tablets",
+      "monthlyUsageHistory": [420, 445, 462],
+      "reorderPoint": 200,
+      "supplier": "GlucoMed"
+    },
+    {
+      "id": "MED-003",
+      "name": "Lisinopril 10mg",
+      "category": "ACE Inhibitor",
+      "currentStock": 124,
+      "unit": "tablets",
+      "monthlyUsageHistory": [198, 210, 205],
+      "reorderPoint": 100,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-004",
+      "name": "Paracetamol 1g",
+      "category": "Analgesic",
+      "currentStock": 890,
+      "unit": "tablets",
+      "monthlyUsageHistory": [750, 820, 795],
+      "reorderPoint": 300,
+      "supplier": "HealthGen"
+    },
+    {
+      "id": "MED-005",
+      "name": "Omeprazole 20mg",
+      "category": "Proton Pump Inhibitor",
+      "currentStock": 215,
+      "unit": "capsules",
+      "monthlyUsageHistory": [180, 195, 188],
+      "reorderPoint": 100,
+      "supplier": "GastroRelief"
+    },
+    {
+      "id": "MED-006",
+      "name": "Atorvastatin 20mg",
+      "category": "Statin",
+      "currentStock": 45,
+      "unit": "tablets",
+      "monthlyUsageHistory": [310, 325, 340],
+      "reorderPoint": 150,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-007",
+      "name": "Salbutamol Inhaler",
+      "category": "Bronchodilator",
+      "currentStock": 28,
+      "unit": "inhalers",
+      "monthlyUsageHistory": [35, 42, 38],
+      "reorderPoint": 15,
+      "supplier": "RespTech"
+    },
+    {
+      "id": "MED-008",
+      "name": "Ciprofloxacin 500mg",
+      "category": "Antibiotic",
+      "currentStock": 156,
+      "unit": "tablets",
+      "monthlyUsageHistory": [142, 135, 158],
+      "reorderPoint": 80,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-009",
+      "name": "Insulin Lispro (Humalog)",
+      "category": "Insulin",
+      "currentStock": 32,
+      "unit": "vials",
+      "monthlyUsageHistory": [28, 31, 29],
+      "reorderPoint": 10,
+      "supplier": "DiabetCare"
+    },
+    {
+      "id": "MED-010",
+      "name": "Pantoprazole 40mg",
+      "category": "Proton Pump Inhibitor",
+      "currentStock": 88,
+      "unit": "tablets",
+      "monthlyUsageHistory": [120, 115, 128],
+      "reorderPoint": 60,
+      "supplier": "GastroRelief"
+    },
+    {
+      "id": "MED-011",
+      "name": "Amlodipine 5mg",
+      "category": "Calcium Channel Blocker",
+      "currentStock": 290,
+      "unit": "tablets",
+      "monthlyUsageHistory": [210, 225, 218],
+      "reorderPoint": 100,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-012",
+      "name": "Diazepam 5mg",
+      "category": "Benzodiazepine",
+      "currentStock": 67,
+      "unit": "tablets",
+      "monthlyUsageHistory": [45, 52, 48],
+      "reorderPoint": 30,
+      "supplier": "NeuroPharm"
+    },
+    {
+      "id": "MED-013",
+      "name": "Cetirizine 10mg",
+      "category": "Antihistamine",
+      "currentStock": 410,
+      "unit": "tablets",
+      "monthlyUsageHistory": [280, 295, 310],
+      "reorderPoint": 120,
+      "supplier": "AllerClear"
+    },
+    {
+      "id": "MED-014",
+      "name": "Morphine Sulfate 10mg/mL",
+      "category": "Opioid Analgesic",
+      "currentStock": 18,
+      "unit": "ampoules",
+      "monthlyUsageHistory": [22, 25, 20],
+      "reorderPoint": 10,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-015",
+      "name": "Ibuprofen 400mg",
+      "category": "NSAID",
+      "currentStock": 620,
+      "unit": "tablets",
+      "monthlyUsageHistory": [480, 510, 495],
+      "reorderPoint": 200,
+      "supplier": "HealthGen"
+    },
+    {
+      "id": "MED-016",
+      "name": "Metoprolol 50mg",
+      "category": "Beta Blocker",
+      "currentStock": 185,
+      "unit": "tablets",
+      "monthlyUsageHistory": [160, 172, 168],
+      "reorderPoint": 80,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-017",
+      "name": "Fluconazole 150mg",
+      "category": "Antifungal",
+      "currentStock": 92,
+      "unit": "capsules",
+      "monthlyUsageHistory": [65, 72, 68],
+      "reorderPoint": 40,
+      "supplier": "DermaPharm"
+    },
+    {
+      "id": "MED-018",
+      "name": "Enoxaparin 40mg/0.4mL",
+      "category": "Anticoagulant",
+      "currentStock": 44,
+      "unit": "syringes",
+      "monthlyUsageHistory": [38, 42, 40],
+      "reorderPoint": 20,
+      "supplier": "HemoTech"
+    }
+  ]
+}
+</file>
+
+<file path="src/data/pastCases.json">
+{
+  "metadata": {
+    "totalCases": 15,
+    "department": "Internal Medicine",
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "cases": [
+    {
+      "id": "CASE-2026-001",
+      "patientAge": 54,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-12",
+      "dischargeDate": "2026-08-17",
+      "symptoms": ["Chest pain", "Shortness of breath", "Diaphoresis", "Nausea"],
+      "diagnosis": "Acute Myocardial Infarction (STEMI)",
+      "treatment": "Emergency PCI with drug-eluting stent to LAD, dual antiplatelet therapy, statin, beta-blocker",
+      "outcome": "Stabilized and discharged with cardiology follow-up in 2 weeks",
+      "tags": ["cardiac", "emergency", "interventional"]
+    },
+    {
+      "id": "CASE-2026-002",
+      "patientAge": 67,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-14",
+      "dischargeDate": "2026-08-21",
+      "symptoms": ["Persistent cough", "Fever 38.9C", "Rust-colored sputum", "Pleuritic chest pain"],
+      "diagnosis": "Community-Acquired Pneumonia (Streptococcus pneumoniae)",
+      "treatment": "IV Ceftriaxone + Azithromycin, transitioned to oral Amoxicillin-Clavulanate, respiratory physiotherapy",
+      "outcome": "Full recovery, cleared chest X-ray at follow-up",
+      "tags": ["infectious", "respiratory", "inpatient"]
+    },
+    {
+      "id": "CASE-2026-003",
+      "patientAge": 42,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-18",
+      "dischargeDate": "2026-08-19",
+      "symptoms": ["Severe headache", "Neck stiffness", "Photophobia", "Vomiting"],
+      "diagnosis": "Subarachnoid Hemorrhage (Hunt-Hess Grade II)",
+      "treatment": "CT angiography, neurosurgical clipping of anterior communicating artery aneurysm, nimodipine, ICU monitoring",
+      "outcome": "Transferred to neuro step-down unit, good neurological recovery at 3-month follow-up",
+      "tags": ["neurological", "surgical", "critical-care"]
+    },
+    {
+      "id": "CASE-2026-004",
+      "patientAge": 71,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-20",
+      "dischargeDate": "2026-08-28",
+      "symptoms": ["Confusion", "Falls", "Urinary incontinence", "Gait instability"],
+      "diagnosis": "Normal Pressure Hydrocephalus",
+      "treatment": "Diagnostic LP with large-volume tap, VP shunt placement, physical therapy",
+      "outcome": "Significant improvement in gait and cognition post-shunting, discharged to rehabilitation",
+      "tags": ["neurological", "surgical", "geriatric"]
+    },
+    {
+      "id": "CASE-2026-005",
+      "patientAge": 38,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-22",
+      "dischargeDate": "2026-08-25",
+      "symptoms": ["Epigastric pain", "Hematemesis", "Melena", "Tachycardia"],
+      "diagnosis": "Peptic Ulcer Disease with Upper GI Bleed (Forrest IIa)",
+      "treatment": "IV PPI, endoscopic hemoclipping, H. pylori eradication therapy, blood transfusion (2 units PRBC)",
+      "outcome": "Hemostasis achieved, tolerating oral diet at discharge",
+      "tags": ["gastroenterology", "emergency", "endoscopy"]
+    },
+    {
+      "id": "CASE-2026-006",
+      "patientAge": 59,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-24",
+      "dischargeDate": "2026-09-01",
+      "symptoms": ["Dyspnea on exertion", "Orthopnea", "Peripheral edema", "Weight gain 4kg in 1 week"],
+      "diagnosis": "Acute Decompensated Heart Failure (HFrEF, EF 28%)",
+      "treatment": "IV Furosemide, fluid restriction, Spironolactone, Carvedilol, sacubitril-valsartan initiated",
+      "outcome": "Stable on oral diuretics, referred to heart failure clinic",
+      "tags": ["cardiac", "inpatient", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-007",
+      "patientAge": 33,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-25",
+      "dischargeDate": "2026-08-27",
+      "symptoms": ["Palpitations", "Tremor", "Weight loss", "Heat intolerance", "Exophthalmos"],
+      "diagnosis": "Graves Disease with Thyrotoxicosis",
+      "treatment": "Methimazole, Propranolol for symptom control, thyroid uptake scan, endocrinology consult",
+      "outcome": "Symptoms controlled, discharged on antithyroid therapy with outpatient follow-up",
+      "tags": ["endocrine", "outpatient-followup"]
+    },
+    {
+      "id": "CASE-2026-008",
+      "patientAge": 48,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-26",
+      "dischargeDate": "2026-09-02",
+      "symptoms": ["Flank pain", "Hematuria", "Nausea", "Restlessness"],
+      "diagnosis": "Ureteral Calculus (8mm, right mid-ureter)",
+      "treatment": "IV hydration, analgesia, urology consult, ureteroscopic lithotripsy with stent placement",
+      "outcome": "Stone fragmented and removed, stent to be removed in 2 weeks",
+      "tags": ["urology", "surgical", "interventional"]
+    },
+    {
+      "id": "CASE-2026-009",
+      "patientAge": 76,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-27",
+      "dischargeDate": "2026-08-30",
+      "symptoms": ["Acute confusion", "Fever", "Cloudy urine", "Frequency and urgency"],
+      "diagnosis": "Urosepsis secondary to E. coli UTI",
+      "treatment": "IV Piperacillin-Tazobactam, aggressive fluid resuscitation, vasopressors for 24h, source control with Foley catheter",
+      "outcome": "Sepsis resolved, culture-directed antibiotic switch, discharged on oral TMP-SMX",
+      "tags": ["infectious", "geriatric", "critical-care"]
+    },
+    {
+      "id": "CASE-2026-010",
+      "patientAge": 29,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-28",
+      "dischargeDate": "2026-08-30",
+      "symptoms": ["Abdominal pain", "Absent menstruation", "Vaginal spotting", "Positive pregnancy test"],
+      "diagnosis": "Ruptured Ectopic Pregnancy (Left Tubal)",
+      "treatment": "Emergency laparoscopic salpingectomy, 2 units PRBC transfusion, Rh immunoglobulin",
+      "outcome": "Stable post-op, beta-hCG trending down, discharged with gynecology follow-up",
+      "tags": ["gynecology", "emergency", "surgical"]
+    },
+    {
+      "id": "CASE-2026-011",
+      "patientAge": 62,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-29",
+      "dischargeDate": "2026-09-03",
+      "symptoms": ["Joint pain", "Morning stiffness > 1hr", "Symmetric swelling of MCP and PIP joints", "Fatigue"],
+      "diagnosis": "Rheumatoid Arthritis (new diagnosis, seropositive)",
+      "treatment": "Initiated on Prednisone taper + Methotrexate, folic acid supplementation, rheumatology consult, occupational therapy",
+      "outcome": "Symptoms improving, educated on medication adherence, outpatient rheumatology follow-up in 4 weeks",
+      "tags": ["rheumatology", "autoimmune", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-012",
+      "patientAge": 55,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-30",
+      "dischargeDate": "2026-09-02",
+      "symptoms": ["Jaundice", "Dark urine", "Pruritus", "Abdominal distension"],
+      "diagnosis": "Obstructive Jaundice (Pancreatic Head Mass)",
+      "treatment": "ERCP with biliary stent placement, percutaneous biopsy, oncology referral, nutritional support",
+      "outcome": "Bilirubin trending down, awaiting biopsy results for staging",
+      "tags": ["oncology", "gastroenterology", "interventional"]
+    },
+    {
+      "id": "CASE-2026-013",
+      "patientAge": 44,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-31",
+      "dischargeDate": "2026-09-03",
+      "symptoms": ["Wheezing", "Chest tightness", "Cough at night", "History of atopy"],
+      "diagnosis": "Acute Asthma Exacerbation (Moderate-Severe)",
+      "treatment": "Nebulized Salbutamol + Ipratropium, IV Magnesium, Prednisolone, oxygen therapy",
+      "outcome": "Responding well to treatment, peak flow improved to 75% predicted, discharge planned with asthma action plan",
+      "tags": ["respiratory", "emergency", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-014",
+      "patientAge": 81,
+      "patientGender": "Male",
+      "admissionDate": "2026-09-01",
+      "dischargeDate": null,
+      "symptoms": ["Right hip pain after fall", "Inability to bear weight", "Shortened and externally rotated limb"],
+      "diagnosis": "Intracapsular Fracture of Right Neck of Femur (Garden III)",
+      "treatment": "Pre-op optimization, cemented hemiarthroplasty under spinal anesthesia, DVT prophylaxis, physiotherapy day 1 post-op",
+      "outcome": "Surgery completed, mobilizing with frame, awaiting discharge to rehabilitation facility",
+      "tags": ["orthopedic", "surgical", "geriatric", "inpatient"]
+    },
+    {
+      "id": "CASE-2026-015",
+      "patientAge": 36,
+      "patientGender": "Female",
+      "admissionDate": "2026-09-02",
+      "dischargeDate": null,
+      "symptoms": ["Seizure", "Loss of consciousness 3 minutes", "Post-ictal confusion", "Tongue laceration"],
+      "diagnosis": "First Unprovoked Generalized Tonic-Clonic Seizure",
+      "treatment": "CT head (normal), EEG scheduled, Levetiracetam initiation, neurology consult, driving restriction counseling",
+      "outcome": "No further seizures, pending EEG results, planned discharge with neurology outpatient follow-up",
+      "tags": ["neurological", "inpatient", "diagnostic"]
+    }
+  ]
+}
+</file>
+
+<file path="src/utils/cases.ts">
+import pastCasesData from "@/data/pastCases.json";
+
+export interface PastCase {
+  id: string;
+  patientAge: number;
+  patientGender: string;
+  admissionDate: string;
+  dischargeDate: string | null;
+  symptoms: string[];
+  diagnosis: string;
+  treatment: string;
+  outcome: string;
+  tags: string[];
+}
+
+const CASES: PastCase[] = pastCasesData.cases;
+
+const normalize = (s: string) => s.toLowerCase().trim();
+
+/**
+ * Case-insensitive substring search across a case's symptoms and tags.
+ * Returns a filter function that keeps a case when any symptom or tag
+ * contains the query substring.
+ */
+export function matchCase(c: PastCase, query: string): boolean {
+  const q = normalize(query);
+  if (!q) return true;
+  return [...c.symptoms, ...c.tags].some((field) =>
+    normalize(field).includes(q)
+  );
+}
+
+export function getCases(query: string): PastCase[] {
+  return CASES.filter((c) => matchCase(c, query));
+}
+
+export function getCaseById(id: string): PastCase | undefined {
+  return CASES.find((c) => c.id === id);
+}
+
+export function formatDate(iso: string | null): string {
+  if (!iso) return "Inpatient";
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export interface PatientProfile {
+  age: number;
+  symptoms: string[];
+  notes: string;
+}
+
+export interface SimilarCase {
+  caseId: string;
+  hospital: string;
+  diagnosis: string;
+  age: string;
+  match: number; // 0..1 percent match
+}
+
+export interface TreatmentPathway {
+  label: string;
+  steps: string[];
+}
+
+export interface RecommendationResult {
+  matchCount: number;
+  pathway: TreatmentPathway;
+  complications: string[];
+  stats: { recovery: number; stayDays: number; confidence: number };
+}
+
+const SIMILAR_HOSPITALS = [
+  "St. Meridian General",
+  "Lakeside Regional",
+  "Central City",
+  "Harborview",
+] as const;
+
+const COMPLICATIONS: Record<string, string[]> = {
+  cardiac: ["Post-procedural arrhythmia", "Contrast-induced nephropathy"],
+  infectious: [
+    "Secondary infection risk",
+    "Persistent fever requiring escalation",
+    "Delayed response to first-line antibiotics",
+  ],
+  respiratory: [
+    "Supplemental oxygen dependence",
+    "Bronchospasm recurrence within 48h",
+  ],
+  neurological: [
+    "Delayed neurological recovery",
+    "Seizure recurrence in first 72h",
+  ],
+  surgical: [
+    "Surgical site infection risk",
+    "Delayed wound healing",
+    "Post-operative bleeding",
+  ],
+  geriatric: [
+    "Delirium during admission",
+    "Increased fall risk",
+    "Pressure injury risk",
+  ],
+};
+
+const COMPLICATION_POOL = [
+  "Elevated inflammatory markers",
+  "Fluid and electrolyte imbalance",
+  "Early relapse requiring readmission",
+  "Medication intolerance",
+];
+
+function symptomOverlap(a: string[], b: string[]): number {
+  const aNorm = a.map(normalize);
+  const bNorm = b.map(normalize);
+  return aNorm.filter((s) => bNorm.some((x) => x.includes(s) || s.includes(x)))
+    .length;
+}
+
+function scoreCase(profile: PatientProfile, c: PastCase): number {
+  const ageDiff = Math.abs(profile.age - c.patientAge);
+  const ageScore = Math.max(0, 1 - ageDiff / 40);
+  const symScore = Math.min(
+    1,
+    symptomOverlap(profile.symptoms, c.symptoms) / Math.max(1, profile.symptoms.length)
+  );
+  return 0.6 * symScore + 0.4 * ageScore;
+}
+
+function buildSteps(treatment: string): string[] {
+  const cleaned = treatment.replace(/\.$/, "");
+  const parts = cleaned.match(/[^,]+(?: and [^,]+)?(?=,|$)/g) ?? [cleaned];
+  const steps = parts.map((p) => p.trim().replace(/^,?\s*/, ""));
+  if (steps.length === 0 || steps[0] === "") return [cleaned.trim()];
+  return steps.slice(0, 5);
+}
+
+function pickComplications(c: PastCase): string[] {
+  const fromTags = c.tags
+    .map((t) => COMPLICATIONS[t])
+    .filter(Boolean)
+    .flat();
+  const merged = [...fromTags, ...COMPLICATION_POOL];
+  const index = c.symptoms.length % merged.length;
+  const second = (index + 1 + (c.symptoms.length % 2)) % merged.length;
+  return [merged[index], merged[second]].filter(
+    (v, i, arr) => arr.indexOf(v) === i
+  );
+}
+
+/**
+ * Deterministic profile matching and treatment pathway simulation.
+ * Scores every past case by shared symptoms and age proximity, then builds
+ * a plausible treatment pathway from the best matching case.
+ */
+export function matchPatientProfile(profile: PatientProfile): RecommendationResult {
+  const empty: RecommendationResult = {
+    matchCount: 0,
+    pathway: {
+      label: "Awaiting assessment",
+      steps: ["Full clinical evaluation", "Confirm working diagnosis", "Initiate supportive care"],
+    },
+    complications: [],
+    stats: { recovery: 70, stayDays: 3, confidence: 0.7 },
+  };
+
+  if (CASES.length === 0) return empty;
+
+  const scored = CASES.map((c) => ({ c, score: scoreCase(profile, c) })).sort(
+    (a, b) => b.score - a.score
+  );
+
+  const top = scored[0].c;
+  const matchers = scored.filter((s) => s.score > 0);
+  const matchCount = Math.max(1, matchers.length);
+
+  const steps = buildSteps(top.treatment);
+  const recovery = Math.round(
+    70 + Math.min(25, (top.patientAge % 5) * 3 + (profile.symptoms.length % 3) * 5)
+  );
+  const stayDays = Math.round(
+    3 + ((top.patientAge + profile.symptoms.length) % 7)
+  );
+  const confidence = Math.round(
+    (0.7 + Math.min(0.22, 0.03 * matchers.length)) * 100
+  ) / 100;
+
+  return {
+    matchCount,
+    pathway: {
+      label: `${top.diagnosis} - Recommended pathway`,
+      steps,
+    },
+    complications: pickComplications(top),
+    stats: { recovery, stayDays, confidence },
+  };
+}
+
+/**
+ * Return the top ~4 anonymized similar cases for a profile with match %.
+ */
+export function similarCases(profile: PatientProfile): SimilarCase[] {
+  return CASES.map((c) => ({ c, score: scoreCase(profile, c) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map(({ c, score }, i) => ({
+      caseId: c.id,
+      hospital: SIMILAR_HOSPITALS[i % SIMILAR_HOSPITALS.length],
+      diagnosis: c.diagnosis,
+      age: `age ${c.patientAge}`,
+      match: Math.round(score * 100) / 100,
+    }));
+}
+</file>
+
+<file path="src/utils/predictions.ts">
+import type { DailyAdmissionData } from "@/utils/types";
+
+// Re-export shared domain types so existing imports from this module keep working.
+export type { DailyAdmissionData, MedicineStock } from "@/utils/types";
+
+/**
+ * Simple linear regression using least squares.
+ * Returns slope and intercept for y = slope * x + intercept.
+ */
+export function linearRegression(data: number[]): {
+  slope: number;
+  intercept: number;
+  predict: (x: number) => number;
+} {
+  const n = data.length;
+  if (n === 0) return { slope: 0, intercept: 0, predict: () => 0 };
+
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += data[i];
+    sumXY += i * data[i];
+    sumX2 += i * i;
+  }
+
+  const denom = n * sumX2 - sumX * sumX;
+  const slope = denom === 0 ? 0 : (n * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / n;
+
+  return {
+    slope,
+    intercept,
+    predict: (x: number) => slope * x + intercept,
+  };
+}
+
+/**
+ * Predict occupancy N hours from now using linear regression on daily occupancy.
+ * Assumes 1 data point per day, projects forward by hours/24 days.
+ */
+export function predictOccupancy(
+  dailyData: DailyAdmissionData[],
+  hoursAhead: number
+): number {
+  if (dailyData.length === 0) return 0;
+  const occupancies = dailyData.map((d) => d.occupancy);
+  const reg = linearRegression(occupancies);
+  const daysAhead = hoursAhead / 24;
+  const predicted = reg.predict(occupancies.length - 1 + daysAhead);
+  return Math.round(Math.max(0, Math.min(TOTAL_BEDS, predicted)));
+}
+
+/**
+ * Compute average daily usage from 3 months of monthly usage history.
+ */
+export function avgDailyUsage(monthlyHistory: number[]): number {
+  if (monthlyHistory.length === 0) return 0;
+  const avgMonthly = monthlyHistory.reduce((a, b) => a + b, 0) / monthlyHistory.length;
+  return avgMonthly / 30;
+}
+
+/**
+ * Calculate days until stockout given current stock and average daily usage.
+ */
+export function daysUntilStockout(
+  currentStock: number,
+  monthlyHistory: number[]
+): number {
+  const daily = avgDailyUsage(monthlyHistory);
+  if (daily <= 0) return Infinity;
+  return Math.floor(currentStock / daily);
+}
+
+/**
+ * Stock status: critical (<7 days), warning (<14 days), adequate (>=14 days)
+ */
+export function stockStatus(daysLeft: number): "critical" | "warning" | "adequate" {
+  if (daysLeft < 7) return "critical";
+  if (daysLeft < 14) return "warning";
+  return "adequate";
+}
+
+export const STATUS_COLORS = {
+  critical: { bg: "#FEF2F2", text: "#B91C1C", dot: "#DC2626" },
+  warning: { bg: "#FFFBEB", text: "#B45309", dot: "#D97706" },
+  adequate: { bg: "#F0FDF4", text: "#15803D", dot: "#16A34A" },
+} as const;
+
+export const TOTAL_BEDS = 200;
+
+/**
+ * Format an occupancy/capacity figure as a whole percentage string (e.g. "87%").
+ * Clamps to 0-100 and rounds to no decimals.
+ */
+export function formatCapacity(value: number): string {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  return `${clamped}%`;
+}
+
+/**
+ * Convert an absolute occupancy count into a whole percentage of total beds.
+ */
+export function capacityPercent(occupancy: number): number {
+  return Math.round((occupancy / TOTAL_BEDS) * 100);
+}
+
+/**
+ * Compare the first and last values of a series to infer a trend.
+ * last > first => "up", last < first => "down", otherwise "flat".
+ */
+export function trendDirection(values: number[]): "up" | "down" | "flat" {
+  if (values.length < 2) return "flat";
+  const first = values[0];
+  const last = values[values.length - 1];
+  if (last > first) return "up";
+  if (last < first) return "down";
+  return "flat";
+}
+
+/**
+ * Staffing coverage as a whole percentage of on-duty staff vs shift target.
+ */
+export function staffingRatio(onDuty: number, shiftTarget: number): number {
+  if (shiftTarget <= 0) return 0;
+  return Math.round((onDuty / shiftTarget) * 100);
+}
+
+/**
+ * Confidence grade: high (>=0.8), medium (>=0.6), low (<0.6).
+ */
+export function confidenceGrade(
+  confidence: number
+): "high" | "medium" | "low" {
+  if (confidence >= 0.8) return "high";
+  if (confidence >= 0.6) return "medium";
+  return "low";
+}
+</file>
+
+<file path=".gitignore">
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+</file>
+
+<file path="AGENTS.md">
+# Expo HAS CHANGED
+
+Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+</file>
+
+<file path="babel.config.js">
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
+  };
+};
+</file>
+
+<file path="CLAUDE.md">
+@AGENTS.md
+</file>
+
+<file path="LICENSE">
+The MIT License (MIT)
+
+Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</file>
+
+<file path="metro.config.js">
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withNativeWind(config, { input: "./src/global.css" });
+</file>
+
+<file path="nativewind-env.d.ts">
+/// <reference types="nativewind/types" />
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/app/**/*.{js,jsx,ts,tsx}",
+    "./src/components/**/*.{js,jsx,ts,tsx}",
+  ],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: "#F0FDFA",
+          100: "#CCFBF1",
+          200: "#99F6E4",
+          300: "#5EEAD4",
+          400: "#2DD4BF",
+          500: "#0F766E",
+          600: "#0D9488",
+          700: "#0F766E",
+          800: "#115E59",
+          900: "#134E4A",
+        },
+        slate: {
+          50: "#F8FAFC",
+          100: "#F1F5F9",
+          200: "#E2E8F0",
+          300: "#CBD5E1",
+          400: "#94A3B8",
+          500: "#64748B",
+          600: "#475569",
+          700: "#334155",
+          800: "#1E293B",
+          900: "#0F172A",
+        },
+        warning: {
+          50: "#FFFBEB",
+          100: "#FEF3C7",
+          200: "#FDE68A",
+          300: "#FCD34D",
+          400: "#FBBF24",
+          500: "#D97706",
+          600: "#B45309",
+          700: "#92400E",
+        },
+        background: "#F8FAFC",
+      },
+      spacing: {
+        "med-1": "4px",
+        "med-2": "8px",
+        "med-3": "16px",
+        "med-4": "24px",
+        "med-5": "32px",
+        "med-6": "64px",
+      },
+      borderRadius: {
+        med: "12px",
+      },
+      fontSize: {
+        "med-xs": ["12px", "16px"],
+        "med-sm": ["14px", "20px"],
+        "med-base": ["16px", "24px"],
+        "med-lg": ["18px", "28px"],
+        "med-xl": ["20px", "28px"],
+        "med-2xl": ["24px", "32px"],
+        "med-3xl": ["30px", "36px"],
+      },
+    },
+  },
+  plugins: [],
+};
+</file>
+
+<file path="src/app/_layout.tsx">
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Colors } from "@/constants/theme";
+import { SessionProvider } from "@/context/session";
+
+export default function RootLayout() {
+  return (
+    <SessionProvider>
+      <StatusBar style="light" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.dark.background },
+        }}
+      />
+    </SessionProvider>
+  );
+}
+</file>
+
+<file path="src/components/ui/collapsible.tsx">
+import { PropsWithChildren, useState } from "react";
+import { Pressable, View, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeIn } from "react-native-reanimated";
+
+import { ThemedText } from "@/components/themed-text";
+import { useTheme } from "@/hooks/use-theme";
+
+export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const theme = useTheme();
+
+  return (
+    <View>
+      <Pressable
+        style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
+        onPress={() => setIsOpen((value) => !value)}
+      >
+        <View
+          style={[
+            styles.button,
+            { backgroundColor: theme.backgroundElement },
+          ]}
+        >
+          <Ionicons
+            name={isOpen ? "chevron-down" : "chevron-forward"}
+            size={14}
+            color={theme.text}
+          />
+        </View>
+        <ThemedText type="small">{title}</ThemedText>
+      </Pressable>
+      {isOpen && (
+        <Animated.View entering={FadeIn.duration(200)}>
+          <View style={[styles.content, { backgroundColor: theme.backgroundElement }]}>
+            {children}
+          </View>
+        </Animated.View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  heading: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  pressedHeading: {
+    opacity: 0.7,
+  },
+  button: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    marginTop: 16,
+    borderRadius: 12,
+    marginLeft: 24,
+    padding: 16,
+  },
+});
+</file>
+
+<file path="src/components/themed-text.tsx">
+import { StyleSheet, Text, type TextProps } from "react-native";
+
+import { Fonts, ThemeColor } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+
+export type ThemedTextProps = TextProps & {
+  type?: "default" | "title" | "small" | "smallBold" | "subtitle" | "link" | "code";
+  themeColor?: ThemeColor;
+};
+
+export function ThemedText({ style, type = "default", themeColor, ...rest }: ThemedTextProps) {
+  const theme = useTheme();
+
+  return (
+    <Text
+      style={[
+        { color: theme[themeColor ?? "text"] },
+        type === "default" && styles.default,
+        type === "title" && styles.title,
+        type === "small" && styles.small,
+        type === "smallBold" && styles.smallBold,
+        type === "subtitle" && styles.subtitle,
+        type === "link" && styles.link,
+        type === "code" && styles.code,
+        style,
+      ]}
+      {...rest}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  small: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: 500,
+  },
+  smallBold: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: 700,
+  },
+  default: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: 500,
+  },
+  title: {
+    fontSize: 48,
+    fontWeight: 600,
+    lineHeight: 52,
+  },
+  subtitle: {
+    fontSize: 32,
+    lineHeight: 44,
+    fontWeight: 600,
+  },
+  link: {
+    lineHeight: 30,
+    fontSize: 14,
+    color: "#0F766E",
+  },
+  code: {
+    fontFamily: Fonts.mono,
+    fontSize: 12,
+  },
+});
+</file>
+
+<file path="src/components/themed-view.tsx">
+import { View, type ViewProps } from "react-native";
+
+import { ThemeColor } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+
+export type ThemedViewProps = ViewProps & {
+  lightColor?: string;
+  darkColor?: string;
+  type?: ThemeColor;
+};
+
+export function ThemedView({ style, lightColor, darkColor, type, ...otherProps }: ThemedViewProps) {
+  const theme = useTheme();
+
+  return <View style={[{ backgroundColor: theme[type ?? "background"] }, style]} {...otherProps} />;
+}
+</file>
+
+<file path="src/constants/theme.ts">
+import { Platform } from "react-native";
+
+/**
+ * MedNexus AI — dark-first navy + blue design system.
+ * Design targets dark mode; a sensible light variant is provided for completeness.
+ */
+export const Colors = {
+  dark: {
+    background: "#0A0E1A",
+    backgroundDim: "#0D1220",
+    card: "#131A2A",
+    cardElevated: "#182033",
+    backgroundElement: "#182033",
+    border: "#1E293B",
+    primary: "#38BDF8",
+    primaryDim: "#0EA5E9",
+    gradientStart: "#38BDF8",
+    gradientMid: "#3B82F6",
+    gradientEnd: "#2563EB",
+    accent: "#38BDF8",
+    success: "#34D399",
+    warning: "#FBBF24",
+    critical: "#F87171",
+    info: "#A78BFA",
+    confidence: "#A78BFA",
+    text: "#F8FAFC",
+    textSecondary: "#94A3B8",
+    textMuted: "#64748B",
+    tabActive: "#38BDF8",
+    tabInactive: "#64748B",
+    glass: "rgba(19, 26, 42, 0.72)",
+  },
+  light: {
+    background: "#F1F5F9",
+    backgroundDim: "#E9EEF5",
+    card: "#FFFFFF",
+    cardElevated: "#FFFFFF",
+    backgroundElement: "#FFFFFF",
+    border: "#E2E8F0",
+    primary: "#2563EB",
+    primaryDim: "#3B82F6",
+    gradientStart: "#38BDF8",
+    gradientMid: "#3B82F6",
+    gradientEnd: "#2563EB",
+    accent: "#2563EB",
+    success: "#059669",
+    warning: "#B45309",
+    critical: "#DC2626",
+    info: "#7C3AED",
+    confidence: "#7C3AED",
+    text: "#0F172A",
+    textSecondary: "#475569",
+    textMuted: "#94A3B8",
+    tabActive: "#2563EB",
+    tabInactive: "#94A3B8",
+    glass: "rgba(255, 255, 255, 0.8)",
+  },
+} as const;
+
+export type ThemeColor = keyof typeof Colors.dark;
+
+export const Radii = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  pill: 999,
+} as const;
+
+export const Spacing = {
+  one: 4,
+  two: 8,
+  three: 16,
+  four: 24,
+  five: 32,
+  six: 64,
+} as const;
+
+export const Gradients = {
+  primary: ["#38BDF8", "#3B82F6", "#2563EB"] as const,
+  header: ["#0A0E1A", "#131A2A"] as const,
+};
+
+export const Fonts = Platform.select({
+  ios: {
+    sans: "system-ui",
+    serif: "ui-serif",
+    rounded: "ui-rounded",
+    mono: "ui-monospace",
+  },
+  default: {
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
+  },
+  web: {
+    sans: "var(--font-display)",
+    serif: "var(--font-serif)",
+    rounded: "var(--font-rounded)",
+    mono: "var(--font-mono)",
+  },
+});
+
+export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const MaxContentWidth = 800;
+</file>
+
+<file path="src/hooks/use-theme.ts">
+import { Colors } from "@/constants/theme";
+
+/**
+ * MedNexus is a dark-first product; every screen is designed against the dark
+ * palette. Returning it unconditionally keeps the whole app on one coherent
+ * visual system. If a light mode is ever shipped, swap this to read the
+ * device color scheme — the `light` palette mirrors the same tokens.
+ */
+export function useTheme() {
+  return Colors.dark;
+}
+</file>
+
+<file path="src/global.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #0F766E;
+  --color-text: #334155;
+  --color-background: #F8FAFC;
+  --color-warning: #D97706;
+}
+</file>
+
+<file path="app.json">
+{
+  "expo": {
+    "name": "MedNexus",
+    "slug": "mednexus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "mednexus",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/expo.icon"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F766E",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F766E",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "mednexus",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "dependencies": {
+    "@expo/ui": "~57.0.15",
+    "@expo/vector-icons": "^15.0.2",
+    "expo": "~57.0.19",
+    "expo-constants": "~57.0.17",
+    "expo-device": "~57.0.1",
+    "expo-font": "~57.0.3",
+    "expo-glass-effect": "~57.0.1",
+    "expo-image": "~57.0.4",
+    "expo-linear-gradient": "~57.0.1",
+    "expo-linking": "~57.0.9",
+    "expo-router": "~57.0.18",
+    "expo-splash-screen": "~57.0.8",
+    "expo-status-bar": "~57.0.1",
+    "expo-symbols": "~57.0.2",
+    "expo-system-ui": "~57.0.3",
+    "expo-web-browser": "~57.0.2",
+    "nativewind": "^4.2.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-gifted-charts": "^1.4.78",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "~0.21.0",
+    "react-native-worklets": "0.10.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "babel-preset-expo": "^57.0.10",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "reset-project": "node ./scripts/reset-project.js",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "expo lint"
+  },
+  "private": true
+}
+</file>
+
+<file path="README.md">
+# MedNexus
+
+> Hospital operations companion — bed-occupancy forecasting, pharmacy stock monitoring, and a searchable clinical case archive. Built with Expo and React Native.
+
+MedNexus gives ward and pharmacy staff an at-a-glance view of hospital capacity and supply, plus a fast way to look up how similar past cases were treated.
+
+**Stack:** Expo SDK 57 · React Native 0.86 · React 19 · expo-router (typed routes) · TypeScript (strict) · react-native-gifted-charts · NativeWind / Tailwind
+
+> ⚠️ **Demo data only.** Everything under [`src/data/`](src/data) is synthetic. MedNexus ships with no real patient information (PHI) and is not yet wired to a backend.
+
+## Features
+
+### 📊 Dashboard
+- **Bed occupancy** — beds in use out of 200, utilization %, and a 14-day trend line.
+- **48-hour forecast** — projects occupancy with a least-squares linear regression over recent days, shown with an up/down delta.
+- **At-a-glance vitals** — ICU occupancy, ER visits, and the 14-day average.
+- **Pharmacy stock** — per-medicine cards with current stock, estimated days until stockout, average daily use, and a critical / warning / adequate status.
+- **Quick stats** — low-stock item count, admissions, and discharges for the day.
+
+### 🔎 Clinical Memory
+- **Search** past cases by symptom or tag, with live match highlighting.
+- **Case cards** summarizing diagnosis, tags, symptoms, and outcome.
+- **Detail view** (modal) with patient demographics, admission/discharge dates, symptoms, treatment, and outcome.
+
+## Getting started
+
+**Prerequisites:** a recent Node.js LTS (20+), npm, and either the [Expo Go](https://expo.dev/go) app on a device or an Android emulator / iOS simulator.
+
+```bash
+npm install      # install dependencies
+npx expo start   # start the dev server
+```
+
+Then press `a` (Android), `i` (iOS), or `w` (web) in the terminal — or scan the QR code with Expo Go.
+
+### Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm start` | Start the Expo dev server |
+| `npm run android` | Open on an Android emulator/device |
+| `npm run ios` | Open on an iOS simulator |
+| `npm run web` | Open in a web browser |
+| `npm run lint` | Lint with `expo lint` |
+
+## Project structure
+
+```
+src/
+├── app/                        # expo-router routes (file-based)
+│   ├── _layout.tsx             # root Stack
+│   ├── index.tsx               # "/"  →  redirects to /dashboard
+│   └── (tabs)/
+│       ├── _layout.tsx         # bottom tab navigator
+│       ├── dashboard.tsx       # Dashboard tab
+│       └── clinical-memory.tsx # Clinical Memory tab
+├── components/                 # shared UI (skeleton, themed text/view, collapsible…)
+├── constants/theme.ts          # Colors (light + dark), Spacing, Fonts
+├── data/                       # synthetic demo datasets (JSON)
+├── hooks/                      # color-scheme / theme hooks
+└── utils/                      # pure logic: predictions.ts, cases.ts
+```
+
+The entry route `/` redirects to the **Dashboard** tab; the two tabs are **Dashboard** and **Clinical Memory**.
+
+## Data
+
+All datasets are bundled JSON under [`src/data/`](src/data) and are **synthetic**:
+
+| File | Contents |
+| --- | --- |
+| `admissions.json` | 14 days of daily metrics — admissions, discharges, occupancy, ICU occupancy, ER visits |
+| `medicineStock.json` | Pharmacy inventory with recent monthly usage history and reorder points |
+| `pastCases.json` | Example clinical cases — symptoms, diagnosis, treatment, outcome, tags |
+
+Forecasting and stock logic live in [`src/utils/predictions.ts`](src/utils/predictions.ts); case search in [`src/utils/cases.ts`](src/utils/cases.ts). A production deployment would replace the static JSON with a live data source.
+
+## Contributing
+
+This project targets **Expo SDK 57 specifically** — APIs change between SDK versions, so check the [versioned docs](https://docs.expo.dev/versions/v57.0.0/) before writing code (see [`AGENTS.md`](AGENTS.md)).
+
+- Branch off `main` and open a pull request.
+- Run `npm run lint` before pushing.
+
+## License
+
+Currently the MIT license inherited from the Expo starter template — see [`LICENSE`](LICENSE). Review and update the copyright and terms before any public release.
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/assets/*": [
+        "./assets/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
+}
+</file>
+
+<file path="src/app/index.tsx">
+import { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Colors, Gradients, Radii, Spacing } from "@/constants/theme";
+import { useSession } from "@/context/session";
+import type { RoleId } from "@/utils/types";
+
+const ROLES: { id: RoleId; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: "admin", label: "Administrator", icon: "shield-checkmark-outline" },
+  { id: "doctor", label: "Doctor", icon: "medkit-outline" },
+  { id: "nurse", label: "Nurse", icon: "bandage-outline" },
+  { id: "pharmacist", label: "Pharmacist", icon: "medical-outline" },
+  { id: "lab_scientist", label: "Lab Scientist", icon: "flask-outline" },
+  { id: "finance_officer", label: "Finance Officer", icon: "card-outline" },
+];
+
+const HOSPITALS = [
+  { name: "St. Meridian General", loc: "Houston, TX" },
+  { name: "Lakeside Regional", loc: "Seattle, WA" },
+  { name: "Central City Med", loc: "Chicago, IL" },
+];
+
+export default function LoginScreen() {
+  const c = Colors.dark;
+  const router = useRouter();
+  const { signIn } = useSession();
+  const { width } = useWindowDimensions();
+
+  const [role, setRole] = useState<RoleId | null>(null);
+  const [hospital, setHospital] = useState(HOSPITALS[0].name);
+
+  const submit = () => {
+    signIn(role ?? "doctor", hospital, "Daniel Chen");
+    router.replace("/(tabs)/dashboard");
+  };
+
+  const roleChips = 3;
+
+  return (
+    <LinearGradient colors={Gradients.header} style={styles.bg}>
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Brand */}
+          <View style={styles.brandRow}>
+            <View style={styles.logoMark}>
+              <Ionicons name="pulse-outline" size={20} color={Colors.dark.primary} />
+            </View>
+            <Text style={[styles.brandName, { color: c.text }]}>MedNexus AI</Text>
+          </View>
+
+          <View style={styles.heading}>
+            <Text style={[styles.title, { color: c.text }]}>Welcome back</Text>
+            <Text style={[styles.subtitle, { color: c.textSecondary }]}>
+              Sign in to your hospital command center
+            </Text>
+          </View>
+
+          {/* Role selector */}
+          <Text style={[styles.label, { color: c.textSecondary }]}>Select role</Text>
+          <View style={styles.roleGrid}>
+            {ROLES.map((r, i) => {
+              const inLastRow = i >= ROLES.length - (ROLES.length % roleChips || roleChips);
+              const selected = role === r.id;
+              return (
+                <TouchableOpacity
+                  key={r.id}
+                  activeOpacity={0.85}
+                  onPress={() => setRole(r.id)}
+                  style={[
+                    styles.roleChip,
+                    { width: (width - Spacing.four * 2 - Spacing.two * (roleChips - 1)) / roleChips },
+                    inLastRow && styles.roleChipLastRow,
+                    selected && { borderColor: c.primary, backgroundColor: c.cardElevated },
+                  ]}
+                >
+                  <Ionicons name={r.icon} size={20} color={selected ? c.primary : c.textSecondary} />
+                  <Text style={[styles.roleLabel, { color: selected ? c.text : c.textSecondary }]}>
+                    {r.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Hospital picker */}
+          <Text style={[styles.label, { color: c.textSecondary }]}>Hospital workspace</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.hospitalRow}
+          >
+            {HOSPITALS.map((h) => {
+              const selected = hospital === h.name;
+              return (
+                <Pressable
+                  key={h.name}
+                  onPress={() => setHospital(h.name)}
+                  style={[styles.hospitalCard, selected && { borderColor: c.primary }]}
+                >
+                  <Ionicons
+                    name="business-outline"
+                    size={18}
+                    color={selected ? c.primary : c.textSecondary}
+                  />
+                  <View style={styles.hospitalText}>
+                    <Text style={[styles.hospitalName, { color: selected ? c.text : c.textSecondary }]}>
+                      {h.name}
+                    </Text>
+                    <Text style={[styles.hospitalLoc, { color: c.textMuted }]}>{h.loc}</Text>
+                  </View>
+                  {selected ? (
+                    <Ionicons name="checkmark-circle" size={16} color={c.primary} />
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Sign in */}
+          <TouchableOpacity activeOpacity={0.9} onPress={submit} style={styles.primaryBtn}>
+            <LinearGradient
+              colors={Gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.primaryBtnGradient}
+            >
+              <Text style={styles.primaryBtnText}>Sign In</Text>
+              <Ionicons name="arrow-forward" size={18} color="#0A0E1A" />
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={submit}
+            style={[styles.faceIdBtn, { borderColor: c.border }]}
+          >
+            <Ionicons name="scan-outline" size={18} color={c.text} />
+            <Text style={[styles.faceIdText, { color: c.text }]}>Sign in with Face ID</Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.footnote, { color: c.textMuted }]}>
+            Secure, role-based access · All data is simulated
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  bg: { flex: 1 },
+  safe: { flex: 1 },
+  content: { padding: Spacing.four, paddingBottom: Spacing.five },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: Spacing.two },
+  logoMark: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "rgba(56,189,248,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandName: { fontSize: 16, fontWeight: "700", letterSpacing: 0.3 },
+  heading: { marginTop: Spacing.five, marginBottom: Spacing.four },
+  title: { fontSize: 28, fontWeight: "700", letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, marginTop: Spacing.one },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: Spacing.two,
+    marginTop: Spacing.three,
+  },
+  roleGrid: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
+  roleChip: {
+    height: 84,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+    backgroundColor: Colors.dark.card,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.two,
+  },
+  roleChipLastRow: { marginBottom: 0 },
+  roleLabel: { fontSize: 12, fontWeight: "600" },
+  hospitalRow: { gap: Spacing.two },
+  hospitalCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+    backgroundColor: Colors.dark.card,
+    borderRadius: Radii.lg,
+    padding: Spacing.three,
+    minWidth: 210,
+  },
+  hospitalText: { flex: 1 },
+  hospitalName: { fontSize: 13, fontWeight: "600" },
+  hospitalLoc: { fontSize: 11, marginTop: 2 },
+  primaryBtn: { marginTop: Spacing.five, borderRadius: Radii.md },
+  primaryBtnGradient: {
+    height: 50,
+    borderRadius: Radii.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.two,
+  },
+  primaryBtnText: { fontSize: 16, fontWeight: "700", color: "#0A0E1A" },
+  faceIdBtn: {
+    marginTop: Spacing.three,
+    height: 50,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.two,
+  },
+  faceIdText: { fontSize: 15, fontWeight: "600" },
+  footnote: { textAlign: "center", fontSize: 12, marginTop: Spacing.five },
+});
+</file>
+
+</files>

@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "recommendations": [
+    {
+      "id": "REC-001",
+      "category": "ICU Beds",
+      "title": "Open 2 overflow ICU beds",
+      "detail": "Predicted ICU load may exceed current capacity within 12 hours. Open overflow bays 4A and 4B.",
+      "savings": "Avoids ~$4.2k in transfer costs",
+      "impact": "high",
+      "applied": false
+    },
+    {
+      "id": "REC-002",
+      "category": "Pharmacy",
+      "title": "Reorder Atorvastatin 20mg",
+      "detail": "Stock at ~13% of normal. Place a standing order to avoid a 3-day gap.",
+      "savings": "Prevents $1.1k in emergency sourcing",
+      "impact": "medium",
+      "applied": false
+    },
+    {
+      "id": "REC-003",
+      "category": "Staffing",
+      "title": "Add 1 ER charge nurse for evening shift",
+      "detail": "Forecasted ER volume increase supports an additional charge nurse from 17:00 to 23:00.",
+      "savings": "Improves throughput and reduces wait times",
+      "impact": "high",
+      "applied": true
+    }
+  ]
+}

@@ -1,17 +1,18 @@
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/constants/theme";
+import { SessionProvider } from "@/context/session";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-      }}
-    />
+    <SessionProvider>
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.light.background },
+        }}
+      />
+    </SessionProvider>
   );
 }
