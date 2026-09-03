@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "totalCases": 15,
+    "department": "Internal Medicine",
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "cases": [
+    {
+      "id": "CASE-2026-001",
+      "patientAge": 54,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-12",
+      "dischargeDate": "2026-08-17",
+      "symptoms": ["Chest pain", "Shortness of breath", "Diaphoresis", "Nausea"],
+      "diagnosis": "Acute Myocardial Infarction (STEMI)",
+      "treatment": "Emergency PCI with drug-eluting stent to LAD, dual antiplatelet therapy, statin, beta-blocker",
+      "outcome": "Stabilized and discharged with cardiology follow-up in 2 weeks",
+      "tags": ["cardiac", "emergency", "interventional"]
+    },
+    {
+      "id": "CASE-2026-002",
+      "patientAge": 67,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-14",
+      "dischargeDate": "2026-08-21",
+      "symptoms": ["Persistent cough", "Fever 38.9C", "Rust-colored sputum", "Pleuritic chest pain"],
+      "diagnosis": "Community-Acquired Pneumonia (Streptococcus pneumoniae)",
+      "treatment": "IV Ceftriaxone + Azithromycin, transitioned to oral Amoxicillin-Clavulanate, respiratory physiotherapy",
+      "outcome": "Full recovery, cleared chest X-ray at follow-up",
+      "tags": ["infectious", "respiratory", "inpatient"]
+    },
+    {
+      "id": "CASE-2026-003",
+      "patientAge": 42,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-18",
+      "dischargeDate": "2026-08-19",
+      "symptoms": ["Severe headache", "Neck stiffness", "Photophobia", "Vomiting"],
+      "diagnosis": "Subarachnoid Hemorrhage (Hunt-Hess Grade II)",
+      "treatment": "CT angiography, neurosurgical clipping of anterior communicating artery aneurysm, nimodipine, ICU monitoring",
+      "outcome": "Transferred to neuro step-down unit, good neurological recovery at 3-month follow-up",
+      "tags": ["neurological", "surgical", "critical-care"]
+    },
+    {
+      "id": "CASE-2026-004",
+      "patientAge": 71,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-20",
+      "dischargeDate": "2026-08-28",
+      "symptoms": ["Confusion", "Falls", "Urinary incontinence", "Gait instability"],
+      "diagnosis": "Normal Pressure Hydrocephalus",
+      "treatment": "Diagnostic LP with large-volume tap, VP shunt placement, physical therapy",
+      "outcome": "Significant improvement in gait and cognition post-shunting, discharged to rehabilitation",
+      "tags": ["neurological", "surgical", "geriatric"]
+    },
+    {
+      "id": "CASE-2026-005",
+      "patientAge": 38,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-22",
+      "dischargeDate": "2026-08-25",
+      "symptoms": ["Epigastric pain", "Hematemesis", "Melena", "Tachycardia"],
+      "diagnosis": "Peptic Ulcer Disease with Upper GI Bleed (Forrest IIa)",
+      "treatment": "IV PPI, endoscopic hemoclipping, H. pylori eradication therapy, blood transfusion (2 units PRBC)",
+      "outcome": "Hemostasis achieved, tolerating oral diet at discharge",
+      "tags": ["gastroenterology", "emergency", "endoscopy"]
+    },
+    {
+      "id": "CASE-2026-006",
+      "patientAge": 59,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-24",
+      "dischargeDate": "2026-09-01",
+      "symptoms": ["Dyspnea on exertion", "Orthopnea", "Peripheral edema", "Weight gain 4kg in 1 week"],
+      "diagnosis": "Acute Decompensated Heart Failure (HFrEF, EF 28%)",
+      "treatment": "IV Furosemide, fluid restriction, Spironolactone, Carvedilol, sacubitril-valsartan initiated",
+      "outcome": "Stable on oral diuretics, referred to heart failure clinic",
+      "tags": ["cardiac", "inpatient", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-007",
+      "patientAge": 33,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-25",
+      "dischargeDate": "2026-08-27",
+      "symptoms": ["Palpitations", "Tremor", "Weight loss", "Heat intolerance", "Exophthalmos"],
+      "diagnosis": "Graves Disease with Thyrotoxicosis",
+      "treatment": "Methimazole, Propranolol for symptom control, thyroid uptake scan, endocrinology consult",
+      "outcome": "Symptoms controlled, discharged on antithyroid therapy with outpatient follow-up",
+      "tags": ["endocrine", "outpatient-followup"]
+    },
+    {
+      "id": "CASE-2026-008",
+      "patientAge": 48,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-26",
+      "dischargeDate": "2026-09-02",
+      "symptoms": ["Flank pain", "Hematuria", "Nausea", "Restlessness"],
+      "diagnosis": "Ureteral Calculus (8mm, right mid-ureter)",
+      "treatment": "IV hydration, analgesia, urology consult, ureteroscopic lithotripsy with stent placement",
+      "outcome": "Stone fragmented and removed, stent to be removed in 2 weeks",
+      "tags": ["urology", "surgical", "interventional"]
+    },
+    {
+      "id": "CASE-2026-009",
+      "patientAge": 76,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-27",
+      "dischargeDate": "2026-08-30",
+      "symptoms": ["Acute confusion", "Fever", "Cloudy urine", "Frequency and urgency"],
+      "diagnosis": "Urosepsis secondary to E. coli UTI",
+      "treatment": "IV Piperacillin-Tazobactam, aggressive fluid resuscitation, vasopressors for 24h, source control with Foley catheter",
+      "outcome": "Sepsis resolved, culture-directed antibiotic switch, discharged on oral TMP-SMX",
+      "tags": ["infectious", "geriatric", "critical-care"]
+    },
+    {
+      "id": "CASE-2026-010",
+      "patientAge": 29,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-28",
+      "dischargeDate": "2026-08-30",
+      "symptoms": ["Abdominal pain", "Absent menstruation", "Vaginal spotting", "Positive pregnancy test"],
+      "diagnosis": "Ruptured Ectopic Pregnancy (Left Tubal)",
+      "treatment": "Emergency laparoscopic salpingectomy, 2 units PRBC transfusion, Rh immunoglobulin",
+      "outcome": "Stable post-op, beta-hCG trending down, discharged with gynecology follow-up",
+      "tags": ["gynecology", "emergency", "surgical"]
+    },
+    {
+      "id": "CASE-2026-011",
+      "patientAge": 62,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-29",
+      "dischargeDate": "2026-09-03",
+      "symptoms": ["Joint pain", "Morning stiffness > 1hr", "Symmetric swelling of MCP and PIP joints", "Fatigue"],
+      "diagnosis": "Rheumatoid Arthritis (new diagnosis, seropositive)",
+      "treatment": "Initiated on Prednisone taper + Methotrexate, folic acid supplementation, rheumatology consult, occupational therapy",
+      "outcome": "Symptoms improving, educated on medication adherence, outpatient rheumatology follow-up in 4 weeks",
+      "tags": ["rheumatology", "autoimmune", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-012",
+      "patientAge": 55,
+      "patientGender": "Male",
+      "admissionDate": "2026-08-30",
+      "dischargeDate": "2026-09-02",
+      "symptoms": ["Jaundice", "Dark urine", "Pruritus", "Abdominal distension"],
+      "diagnosis": "Obstructive Jaundice (Pancreatic Head Mass)",
+      "treatment": "ERCP with biliary stent placement, percutaneous biopsy, oncology referral, nutritional support",
+      "outcome": "Bilirubin trending down, awaiting biopsy results for staging",
+      "tags": ["oncology", "gastroenterology", "interventional"]
+    },
+    {
+      "id": "CASE-2026-013",
+      "patientAge": 44,
+      "patientGender": "Female",
+      "admissionDate": "2026-08-31",
+      "dischargeDate": "2026-09-03",
+      "symptoms": ["Wheezing", "Chest tightness", "Cough at night", "History of atopy"],
+      "diagnosis": "Acute Asthma Exacerbation (Moderate-Severe)",
+      "treatment": "Nebulized Salbutamol + Ipratropium, IV Magnesium, Prednisolone, oxygen therapy",
+      "outcome": "Responding well to treatment, peak flow improved to 75% predicted, discharge planned with asthma action plan",
+      "tags": ["respiratory", "emergency", "chronic-disease"]
+    },
+    {
+      "id": "CASE-2026-014",
+      "patientAge": 81,
+      "patientGender": "Male",
+      "admissionDate": "2026-09-01",
+      "dischargeDate": null,
+      "symptoms": ["Right hip pain after fall", "Inability to bear weight", "Shortened and externally rotated limb"],
+      "diagnosis": "Intracapsular Fracture of Right Neck of Femur (Garden III)",
+      "treatment": "Pre-op optimization, cemented hemiarthroplasty under spinal anesthesia, DVT prophylaxis, physiotherapy day 1 post-op",
+      "outcome": "Surgery completed, mobilizing with frame, awaiting discharge to rehabilitation facility",
+      "tags": ["orthopedic", "surgical", "geriatric", "inpatient"]
+    },
+    {
+      "id": "CASE-2026-015",
+      "patientAge": 36,
+      "patientGender": "Female",
+      "admissionDate": "2026-09-02",
+      "dischargeDate": null,
+      "symptoms": ["Seizure", "Loss of consciousness 3 minutes", "Post-ictal confusion", "Tongue laceration"],
+      "diagnosis": "First Unprovoked Generalized Tonic-Clonic Seizure",
+      "treatment": "CT head (normal), EEG scheduled, Levetiracetam initiation, neurology consult, driving restriction counseling",
+      "outcome": "No further seizures, pending EEG results, planned discharge with neurology outpatient follow-up",
+      "tags": ["neurological", "inpatient", "diagnostic"]
+    }
+  ]
+}

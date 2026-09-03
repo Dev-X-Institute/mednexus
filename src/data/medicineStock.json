@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "lastUpdated": "2026-09-03T08:00:00Z",
+    "pharmacy": "MedNexus Central Pharmacy",
+    "alertThreshold": 20
+  },
+  "medicines": [
+    {
+      "id": "MED-001",
+      "name": "Amoxicillin 500mg",
+      "category": "Antibiotic",
+      "currentStock": 342,
+      "unit": "capsules",
+      "monthlyUsageHistory": [287, 301, 318],
+      "reorderPoint": 150,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-002",
+      "name": "Metformin 850mg",
+      "category": "Antidiabetic",
+      "currentStock": 580,
+      "unit": "tablets",
+      "monthlyUsageHistory": [420, 445, 462],
+      "reorderPoint": 200,
+      "supplier": "GlucoMed"
+    },
+    {
+      "id": "MED-003",
+      "name": "Lisinopril 10mg",
+      "category": "ACE Inhibitor",
+      "currentStock": 124,
+      "unit": "tablets",
+      "monthlyUsageHistory": [198, 210, 205],
+      "reorderPoint": 100,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-004",
+      "name": "Paracetamol 1g",
+      "category": "Analgesic",
+      "currentStock": 890,
+      "unit": "tablets",
+      "monthlyUsageHistory": [750, 820, 795],
+      "reorderPoint": 300,
+      "supplier": "HealthGen"
+    },
+    {
+      "id": "MED-005",
+      "name": "Omeprazole 20mg",
+      "category": "Proton Pump Inhibitor",
+      "currentStock": 215,
+      "unit": "capsules",
+      "monthlyUsageHistory": [180, 195, 188],
+      "reorderPoint": 100,
+      "supplier": "GastroRelief"
+    },
+    {
+      "id": "MED-006",
+      "name": "Atorvastatin 20mg",
+      "category": "Statin",
+      "currentStock": 45,
+      "unit": "tablets",
+      "monthlyUsageHistory": [310, 325, 340],
+      "reorderPoint": 150,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-007",
+      "name": "Salbutamol Inhaler",
+      "category": "Bronchodilator",
+      "currentStock": 28,
+      "unit": "inhalers",
+      "monthlyUsageHistory": [35, 42, 38],
+      "reorderPoint": 15,
+      "supplier": "RespTech"
+    },
+    {
+      "id": "MED-008",
+      "name": "Ciprofloxacin 500mg",
+      "category": "Antibiotic",
+      "currentStock": 156,
+      "unit": "tablets",
+      "monthlyUsageHistory": [142, 135, 158],
+      "reorderPoint": 80,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-009",
+      "name": "Insulin Lispro (Humalog)",
+      "category": "Insulin",
+      "currentStock": 32,
+      "unit": "vials",
+      "monthlyUsageHistory": [28, 31, 29],
+      "reorderPoint": 10,
+      "supplier": "DiabetCare"
+    },
+    {
+      "id": "MED-010",
+      "name": "Pantoprazole 40mg",
+      "category": "Proton Pump Inhibitor",
+      "currentStock": 88,
+      "unit": "tablets",
+      "monthlyUsageHistory": [120, 115, 128],
+      "reorderPoint": 60,
+      "supplier": "GastroRelief"
+    },
+    {
+      "id": "MED-011",
+      "name": "Amlodipine 5mg",
+      "category": "Calcium Channel Blocker",
+      "currentStock": 290,
+      "unit": "tablets",
+      "monthlyUsageHistory": [210, 225, 218],
+      "reorderPoint": 100,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-012",
+      "name": "Diazepam 5mg",
+      "category": "Benzodiazepine",
+      "currentStock": 67,
+      "unit": "tablets",
+      "monthlyUsageHistory": [45, 52, 48],
+      "reorderPoint": 30,
+      "supplier": "NeuroPharm"
+    },
+    {
+      "id": "MED-013",
+      "name": "Cetirizine 10mg",
+      "category": "Antihistamine",
+      "currentStock": 410,
+      "unit": "tablets",
+      "monthlyUsageHistory": [280, 295, 310],
+      "reorderPoint": 120,
+      "supplier": "AllerClear"
+    },
+    {
+      "id": "MED-014",
+      "name": "Morphine Sulfate 10mg/mL",
+      "category": "Opioid Analgesic",
+      "currentStock": 18,
+      "unit": "ampoules",
+      "monthlyUsageHistory": [22, 25, 20],
+      "reorderPoint": 10,
+      "supplier": "PharmaCorp"
+    },
+    {
+      "id": "MED-015",
+      "name": "Ibuprofen 400mg",
+      "category": "NSAID",
+      "currentStock": 620,
+      "unit": "tablets",
+      "monthlyUsageHistory": [480, 510, 495],
+      "reorderPoint": 200,
+      "supplier": "HealthGen"
+    },
+    {
+      "id": "MED-016",
+      "name": "Metoprolol 50mg",
+      "category": "Beta Blocker",
+      "currentStock": 185,
+      "unit": "tablets",
+      "monthlyUsageHistory": [160, 172, 168],
+      "reorderPoint": 80,
+      "supplier": "CardioPharm"
+    },
+    {
+      "id": "MED-017",
+      "name": "Fluconazole 150mg",
+      "category": "Antifungal",
+      "currentStock": 92,
+      "unit": "capsules",
+      "monthlyUsageHistory": [65, 72, 68],
+      "reorderPoint": 40,
+      "supplier": "DermaPharm"
+    },
+    {
+      "id": "MED-018",
+      "name": "Enoxaparin 40mg/0.4mL",
+      "category": "Anticoagulant",
+      "currentStock": 44,
+      "unit": "syringes",
+      "monthlyUsageHistory": [38, 42, 40],
+      "reorderPoint": 20,
+      "supplier": "HemoTech"
+    }
+  ]
+}

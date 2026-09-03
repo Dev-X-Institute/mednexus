@@ -1,0 +1,70 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/app/**/*.{js,jsx,ts,tsx}",
+    "./src/components/**/*.{js,jsx,ts,tsx}",
+  ],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: "#F0FDFA",
+          100: "#CCFBF1",
+          200: "#99F6E4",
+          300: "#5EEAD4",
+          400: "#2DD4BF",
+          500: "#0F766E",
+          600: "#0D9488",
+          700: "#0F766E",
+          800: "#115E59",
+          900: "#134E4A",
+        },
+        slate: {
+          50: "#F8FAFC",
+          100: "#F1F5F9",
+          200: "#E2E8F0",
+          300: "#CBD5E1",
+          400: "#94A3B8",
+          500: "#64748B",
+          600: "#475569",
+          700: "#334155",
+          800: "#1E293B",
+          900: "#0F172A",
+        },
+        warning: {
+          50: "#FFFBEB",
+          100: "#FEF3C7",
+          200: "#FDE68A",
+          300: "#FCD34D",
+          400: "#FBBF24",
+          500: "#D97706",
+          600: "#B45309",
+          700: "#92400E",
+        },
+        background: "#F8FAFC",
+      },
+      spacing: {
+        "med-1": "4px",
+        "med-2": "8px",
+        "med-3": "16px",
+        "med-4": "24px",
+        "med-5": "32px",
+        "med-6": "64px",
+      },
+      borderRadius: {
+        med: "12px",
+      },
+      fontSize: {
+        "med-xs": ["12px", "16px"],
+        "med-sm": ["14px", "20px"],
+        "med-base": ["16px", "24px"],
+        "med-lg": ["18px", "28px"],
+        "med-xl": ["20px", "28px"],
+        "med-2xl": ["24px", "32px"],
+        "med-3xl": ["30px", "36px"],
+      },
+    },
+  },
+  plugins: [],
+};

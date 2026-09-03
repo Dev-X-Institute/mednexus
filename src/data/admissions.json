@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "hospitalName": "MedNexus General Hospital",
+    "totalBeds": 200,
+    "currentOccupancy": 170,
+    "period": "2026-08-21 to 2026-09-03",
+    "generatedAt": "2026-09-03T08:00:00Z"
+  },
+  "dailyData": [
+    {
+      "date": "2026-08-21",
+      "admissions": 14,
+      "discharges": 11,
+      "occupancy": 168,
+      "icuOccupancy": 18,
+      "emergencyVisits": 42
+    },
+    {
+      "date": "2026-08-22",
+      "admissions": 11,
+      "discharges": 9,
+      "occupancy": 170,
+      "icuOccupancy": 19,
+      "emergencyVisits": 38
+    },
+    {
+      "date": "2026-08-23",
+      "admissions": 16,
+      "discharges": 13,
+      "occupancy": 173,
+      "icuOccupancy": 21,
+      "emergencyVisits": 51
+    },
+    {
+      "date": "2026-08-24",
+      "admissions": 9,
+      "discharges": 12,
+      "occupancy": 170,
+      "icuOccupancy": 17,
+      "emergencyVisits": 35
+    },
+    {
+      "date": "2026-08-25",
+      "admissions": 13,
+      "discharges": 8,
+      "occupancy": 175,
+      "icuOccupancy": 20,
+      "emergencyVisits": 44
+    },
+    {
+      "date": "2026-08-26",
+      "admissions": 17,
+      "discharges": 14,
+      "occupancy": 178,
+      "icuOccupancy": 22,
+      "emergencyVisits": 48
+    },
+    {
+      "date": "2026-08-27",
+      "admissions": 12,
+      "discharges": 15,
+      "occupancy": 175,
+      "icuOccupancy": 19,
+      "emergencyVisits": 39
+    },
+    {
+      "date": "2026-08-28",
+      "admissions": 15,
+      "discharges": 11,
+      "occupancy": 179,
+      "icuOccupancy": 23,
+      "emergencyVisits": 46
+    },
+    {
+      "date": "2026-08-29",
+      "admissions": 10,
+      "discharges": 13,
+      "occupancy": 176,
+      "icuOccupancy": 18,
+      "emergencyVisits": 37
+    },
+    {
+      "date": "2026-08-30",
+      "admissions": 18,
+      "discharges": 12,
+      "occupancy": 182,
+      "icuOccupancy": 24,
+      "emergencyVisits": 53
+    },
+    {
+      "date": "2026-08-31",
+      "admissions": 8,
+      "discharges": 14,
+      "occupancy": 176,
+      "icuOccupancy": 17,
+      "emergencyVisits": 33
+    },
+    {
+      "date": "2026-09-01",
+      "admissions": 14,
+      "discharges": 10,
+      "occupancy": 180,
+      "icuOccupancy": 21,
+      "emergencyVisits": 45
+    },
+    {
+      "date": "2026-09-02",
+      "admissions": 12,
+      "discharges": 15,
+      "occupancy": 177,
+      "icuOccupancy": 20,
+      "emergencyVisits": 41
+    },
+    {
+      "date": "2026-09-03",
+      "admissions": 13,
+      "discharges": 10,
+      "occupancy": 180,
+      "icuOccupancy": 22,
+      "emergencyVisits": 47
+    }
+  ],
+  "summary": {
+    "averageDailyAdmissions": 13.1,
+    "averageDailyDischarges": 11.9,
+    "peakOccupancy": 182,
+    "lowOccupancy": 168,
+    "averageOccupancy": 175.4,
+    "bedUtilizationRate": 87.7,
+    "averageIcuOccupancy": 20.1,
+    "totalAdmissions": 183,
+    "totalDischarges": 167,
+    "netPatientChange": 16
+  }
+}
