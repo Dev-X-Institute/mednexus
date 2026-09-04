@@ -1,5 +1,3 @@
-import pastCasesData from "@/data/pastCases.json";
-
 export interface PastCase {
   id: string;
   patientAge: number;
@@ -12,8 +10,6 @@ export interface PastCase {
   outcome: string;
   tags: string[];
 }
-
-const CASES: PastCase[] = pastCasesData.cases;
 
 const normalize = (s: string) => s.toLowerCase().trim();
 
@@ -30,12 +26,12 @@ export function matchCase(c: PastCase, query: string): boolean {
   );
 }
 
-export function getCases(query: string): PastCase[] {
-  return CASES.filter((c) => matchCase(c, query));
+export function getCases(cases: PastCase[], query: string): PastCase[] {
+  return cases.filter((c) => matchCase(c, query));
 }
 
-export function getCaseById(id: string): PastCase | undefined {
-  return CASES.find((c) => c.id === id);
+export function getCaseById(cases: PastCase[], id: string): PastCase | undefined {
+  return cases.find((c) => c.id === id);
 }
 
 export function formatDate(iso: string | null): string {
@@ -157,7 +153,7 @@ function pickComplications(c: PastCase): string[] {
  * Scores every past case by shared symptoms and age proximity, then builds
  * a plausible treatment pathway from the best matching case.
  */
-export function matchPatientProfile(profile: PatientProfile): RecommendationResult {
+export function matchPatientProfile(cases: PastCase[], profile: PatientProfile): RecommendationResult {
   const empty: RecommendationResult = {
     matchCount: 0,
     pathway: {
@@ -168,9 +164,9 @@ export function matchPatientProfile(profile: PatientProfile): RecommendationResu
     stats: { recovery: 70, stayDays: 3, confidence: 0.7 },
   };
 
-  if (CASES.length === 0) return empty;
+  if (cases.length === 0) return empty;
 
-  const scored = CASES.map((c) => ({ c, score: scoreCase(profile, c) })).sort(
+  const scored = cases.map((c) => ({ c, score: scoreCase(profile, c) })).sort(
     (a, b) => b.score - a.score
   );
 
@@ -203,8 +199,8 @@ export function matchPatientProfile(profile: PatientProfile): RecommendationResu
 /**
  * Return the top ~4 anonymized similar cases for a profile with match %.
  */
-export function similarCases(profile: PatientProfile): SimilarCase[] {
-  return CASES.map((c) => ({ c, score: scoreCase(profile, c) }))
+export function similarCases(cases: PastCase[], profile: PatientProfile): SimilarCase[] {
+  return cases.map((c) => ({ c, score: scoreCase(profile, c) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 4)
     .map(({ c, score }, i) => ({

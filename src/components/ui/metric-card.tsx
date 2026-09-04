@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle, Pressable } from "react-native";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,6 +19,8 @@ interface MetricCardProps {
   spark?: number[];
   statusTone?: StatusTone;
   style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  onPress?: () => void;
 }
 
 export function MetricCard({
@@ -30,6 +32,8 @@ export function MetricCard({
   spark,
   statusTone = "success",
   style,
+  accessibilityLabel,
+  onPress,
 }: MetricCardProps) {
   const colors = useTheme();
 
@@ -47,8 +51,19 @@ export function MetricCard({
       ? colors.warning
       : colors.critical;
 
+  const a11yLabel = accessibilityLabel ?? `${label}, ${value}${delta ? `, ${delta}` : ""}`;
+
+  const Component = onPress ? Pressable : View;
+  const pressProps = onPress ? { onPress, activeOpacity: 0.8 } : {};
+
   return (
-    <Card style={style}>
+    <Component
+      {...pressProps}
+      style={[styles.card, style]}
+      accessible={true}
+      accessibilityLabel={a11yLabel}
+      accessibilityRole={onPress ? "button" : "text"}
+    >
       <View style={styles.headerRow}>
         <View style={styles.iconLabel}>
           <StatusDot color={statusColor} />
@@ -69,11 +84,14 @@ export function MetricCard({
         </View>
         {spark && spark.length > 0 ? <Sparkline data={spark} height={36} width={72} /> : null}
       </View>
-    </Card>
+    </Component>
   );
 }
 
 const styles = StyleSheet.create({
+  card: {
+    padding: Spacing.three,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -99,6 +117,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 28,
     fontWeight: "700",
+    fontVariant: ["tabular-nums"],
   },
   delta: {
     fontSize: 12,

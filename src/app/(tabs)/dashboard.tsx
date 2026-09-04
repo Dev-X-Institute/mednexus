@@ -3,9 +3,11 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensio
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Colors, Radii, Spacing } from "@/constants/theme";
-import { useSession } from "@/context/session";
+import { Radii, Spacing } from "@/constants/theme";
+import { useSession } from "@/context/auth";
 import { useDemo } from "@/context/demo";
+import { useTheme } from "@/hooks/use-theme";
+import { useData } from "@/context/data";
 import {
   Card,
   SectionHeader,
@@ -17,24 +19,19 @@ import {
   StatTile,
   Sparkline,
 } from "@/components/ui";
-import admissionsData from "@/data/admissions.json";
-import bloodBankData from "@/data/bloodBank.json";
-import staffData from "@/data/staff.json";
-import theatreData from "@/data/theatreSchedule.json";
-import recommendationsData from "@/data/resourceRecommendations.json";
 import { capacityPercent, formatCapacity, trendDirection } from "@/utils/predictions";
-import { getPredictions } from "@/utils/predictions-source";
-
-const c = Colors.light;
 
 export default function DashboardScreen() {
   const { session } = useSession();
+  const { colors: c } = useTheme();
   const { width } = useWindowDimensions();
+  const { admissions, bloodBank, staff, theatreSchedule, recommendations } = useData();
+  const { mode } = useDemo();
   // Screen padding (16 × 2) + Card padding (16 × 2); divide the remaining
   // space between all three gauges to prevent horizontal overflow.
   const gaugeSize = Math.min(112, Math.max(64, Math.floor((width - 64) / 3)));
 
-  const daily = admissionsData.dailyData;
+  const daily = admissions;
   const last = daily[daily.length - 1];
   const occupancyPct = capacityPercent(last.occupancy);
   const icuPct = Math.round((last.icuOccupancy / 30) * 100);
@@ -42,27 +39,22 @@ export default function DashboardScreen() {
   const occupancySeries = daily.map((d) => d.occupancy);
   const erSeries = daily.map((d) => d.emergencyVisits);
 
-  const { mode } = useDemo();
-  const predictions = getPredictions(mode, daily);
-
   const bloodReserve = useMemo(
     () =>
-      bloodBankData.entries.map((e) => ({
+      bloodBank.map((e) => ({
         ...e,
         pct: Math.round((e.unit / e.capacity) * 100),
       })),
-    []
+    [bloodBank]
   );
 
-  const onDuty = staffData.staff.filter((s) => s.onDuty);
+  const onDuty = staff.filter((s) => s.onDuty);
   const staffByDept: Record<string, number> = {};
   for (const s of onDuty) staffByDept[s.department] = (staffByDept[s.department] ?? 0) + 1;
 
   const availability = onDuty.slice(0, 5);
 
-  const [recommendations, setRecommendations] = useState(
-    recommendationsData.recommendations
-  );
+  const [recommendations, setRecommendations] = useState(recommendations);
 
   const statusToneFor = (v: number) =>
     v >= 85 ? "critical" : v >= 60 ? "warning" : "success";
@@ -114,6 +106,8 @@ export default function DashboardScreen() {
               tone={statusToneFor(occupancyPct) as any}
               centerLabel={`${occupancyPct}%`}
               centerCaption="Bed occ"
+              accessibilityLabel={`Bed occupancy, ${occupancyPct} percent of ${last.occupancy} of 200 beds`}
+              delay={0}
             />
             <RingGauge
               value={icuPct}
@@ -122,14 +116,18 @@ export default function DashboardScreen() {
               tone={icuPct >= 75 ? ("warning" as any) : ("primary" as any)}
               centerLabel={`${icuPct}%`}
               centerCaption="ICU"
+              accessibilityLabel={`ICU occupancy, ${icuPct} percent of ${last.icuOccupancy} of 30 beds`}
+              delay={80}
             />
             <RingGauge
-              value={100}
+              value={Math.min(100, (last.emergencyVisits / 50) * 100)}
               size={gaugeSize}
               strokeWidth={9}
               tone="warning"
               centerLabel={`${last.emergencyVisits}`}
               centerCaption="ER queue"
+              accessibilityLabel={`Emergency room queue, ${last.emergencyVisits} patients waiting`}
+              delay={160}
             />
           </View>
 
@@ -168,6 +166,7 @@ export default function DashboardScreen() {
             deltaTone="neutral"
             statusTone={statusToneFor(occupancyPct)}
             spark={occupancySeries.slice(-9)}
+            accessibilityLabel={`Bed occupancy, ${formatCapacity(occupancyPct)}, ${last.occupancy} of 200 beds occupied`}
           />
           <MetricCard
             style={styles.opsCard}
@@ -180,6 +179,7 @@ export default function DashboardScreen() {
             deltaTone={erDeltaTone}
             statusTone="warning"
             spark={erSeries.slice(-9)}
+            accessibilityLabel={`ER admissions, ${last.admissions} today`}
           />
           <MetricCard
             style={styles.opsCard}
@@ -189,6 +189,7 @@ export default function DashboardScreen() {
             delta={`${Object.keys(staffByDept).length} departments`}
             deltaTone="neutral"
             statusTone="success"
+            accessibilityLabel={`Staff on duty, ${onDuty.length} across ${Object.keys(staffByDept).length} departments`}
           />
           <MetricCard
             style={styles.opsCard}
@@ -199,6 +200,7 @@ export default function DashboardScreen() {
             deltaTone="down"
             statusTone="critical"
             spark={[4, 4, 3, 5, 3, 3, 3]}
+            accessibilityLabel={`Pharmacy alerts, 3 items need review`}
           />
         </View>
 
@@ -322,7 +324,7 @@ export default function DashboardScreen() {
           style={styles.section}
         />
         <Card>
-          {theatreData.slots.map((s, i) => (
+          {theatreSchedule.map((s, i) => (
             <View
               key={s.id}
               style={[styles.theatreRow, i < theatreData.slots.length - 1 && styles.theatreDivider]}

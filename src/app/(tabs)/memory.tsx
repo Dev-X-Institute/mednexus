@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors, Spacing } from "@/constants/theme";
+import { SafeAreaView } from "react-native-safe-area.context";
+import { Spacing } from "@/constants/theme";
 import { Card, SectionHeader, Chip, GradientButton, Badge } from "@/components/ui";
 import { matchPatientProfile, similarCases } from "@/utils/cases";
 import { useDemo } from "@/context/demo";
+import { useTheme } from "@/hooks/use-theme";
+import { useData } from "@/context/data";
 import {
   generateNarrative,
   claudeConfigured,
@@ -13,10 +15,11 @@ import {
   type ClaudeNarrative,
 } from "@/utils/claude";
 
-const c = Colors.light;
 const SYMPTOMS = ["Fever", "Chest pain", "Dyspnea", "Kidney injury", "Hypertension", "Hypotension", "Cough", "Abdominal pain", "Headache", "Fatigue", "Tachycardia", "Confusion"];
 
 export default function MemoryScreen() {
+  const { colors: c } = useTheme();
+  const { pastCases } = useData();
   const scrollRef = useRef<ScrollView>(null);
   const [ageText, setAgeText] = useState("45");
   const [selected, setSelected] = useState<string[]>(["Fever", "Hypertension"]);
@@ -32,8 +35,8 @@ export default function MemoryScreen() {
     return Math.max(1, Math.min(100, n));
   }, [ageText]);
   const profile = useMemo(() => ({ age, symptoms: selected, notes }), [age, selected, notes]);
-  const result = useMemo(() => matchPatientProfile(profile), [profile]);
-  const matches = useMemo(() => similarCases(profile), [profile]);
+  const result = useMemo(() => matchPatientProfile(pastCases, profile), [pastCases, profile]);
+  const matches = useMemo(() => similarCases(pastCases, profile), [pastCases, profile]);
   const onAgeChange = (text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, 3);
     setAgeText(digits);
@@ -47,7 +50,7 @@ export default function MemoryScreen() {
     setAiFailed(false);
     if (mode !== "live") return;
     setNarrating(true);
-    const out = await generateNarrative(profile, matchPatientProfile(profile));
+    const out = await generateNarrative(profile, matchPatientProfile(pastCases, profile));
     setNarrating(false);
     if (out) setNarrative(out);
     else setAiFailed(true);

@@ -1,12 +1,15 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
+import Animated, {
+  useSharedValue,
+  useAnimatedProps,
+  withTiming,
+  withDelay,
+  Easing,
+} from "react-native-reanimated";
 import { useTheme } from "@/hooks/use-theme";
+import { useAccessibility } from "@/context/accessibility";
 
 type GaugeTone = "primary" | "success" | "warning" | "critical";
 
@@ -17,8 +20,14 @@ interface RingGaugeProps {
   tone?: GaugeTone;
   centerLabel?: string;
   centerCaption?: string;
+  accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
+  animate?: boolean;
+  delay?: number;
 }
+
+const ACircle = Animated.createAnimatedComponent(Circle);
+const AG = Animated.createAnimatedComponent(G);
 
 export function RingGauge({
   value,
@@ -27,15 +36,29 @@ export function RingGauge({
   tone = "primary",
   centerLabel,
   centerCaption,
+  accessibilityLabel,
   style,
+  animate = true,
+  delay = 0,
 }: RingGaugeProps) {
   const colors = useTheme();
+  const { reduceMotion } = useAccessibility();
 
   const clamp = Math.max(0, Math.min(100, value));
   const center = size / 2;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const dash = (circumference * clamp) / 100;
+
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    const target = clamp / 100;
+    if (animate && !reduceMotion) {
+      progress.value = withDelay(delay, withTiming(target, { duration: 1000, easing: Easing.out(Easing.ease) }));
+    } else {
+      progress.value = target;
+    }
+  }, [clamp, animate, delay, reduceMotion]);
 
   const strokeColor =
     tone === "primary"
@@ -46,8 +69,22 @@ export function RingGauge({
       ? colors.warning
       : colors.critical;
 
+  const animatedProps = useAnimatedProps(() => {
+    const dash = circumference * progress.value;
+    return {
+      strokeDasharray: `${dash} ${circumference - dash}`,
+    };
+  });
+
+  const a11yLabel = accessibilityLabel ?? `${tone} gauge, ${clamp} percent`;
+
   return (
-    <View style={[styles.wrap, { width: size, height: size }, style]}>
+    <View
+      style={[styles.wrap, { width: size, height: size }, style]}
+      accessible
+      accessibilityLabel={a11yLabel}
+      accessibilityRole="image"
+    >
       <Svg width={size} height={size}>
         <Circle
           cx={center}
@@ -57,8 +94,8 @@ export function RingGauge({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        <G rotation={-90} origin={`${center}, ${center}`}>
-          <Circle
+        <AG rotation={-90} origin={`${center}, ${center}`}>
+          <ACircle
             cx={center}
             cy={center}
             r={radius}
@@ -66,9 +103,9 @@ export function RingGauge({
             strokeWidth={strokeWidth}
             fill="none"
             strokeLinecap="round"
-            strokeDasharray={`${dash} ${circumference - dash}`}
+            animatedProps={animatedProps}
           />
-        </G>
+        </AG>
       </Svg>
       <View style={styles.center} pointerEvents="none">
         {centerLabel ? (
@@ -99,6 +136,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 24,
     fontWeight: "700",
+    fontVariant: ["tabular-nums"],
   },
   caption: {
     fontSize: 11,

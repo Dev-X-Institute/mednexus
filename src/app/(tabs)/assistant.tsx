@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors, Radii, Spacing } from "@/constants/theme";
+import { Radii, Spacing } from "@/constants/theme";
 import { Card, Badge } from "@/components/ui";
-import { useSession } from "@/context/session";
+import { useSession } from "@/context/auth";
+import { useTheme } from "@/hooks/use-theme";
 
-const c = Colors.light;
 const PROMPTS = ["Why is the ER overloaded?", "What needs attention today?", "Summarise ICU capacity"];
 type Message = { id: number; question: string; answer: string };
 
 export default function AssistantScreen() {
   const { session } = useSession();
+  const { colors: c } = useTheme();
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
