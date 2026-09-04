@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Spacing, Radii } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth, ROLE_HOSPITALS, DEFAULT_USERS } from "@/context/auth";
-import { Card, GradientButton, Badge, SectionHeader } from "@/components/ui";
+import { Card, GradientButton, SectionHeader } from "@/components/ui";
+import type { RoleId } from "@/utils/types";
 
-const ROLES = [
+type RoleOption = {
+  id: RoleId;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  desc: string;
+};
+
+const ROLES: RoleOption[] = [
   { id: "admin" as const, label: "Administrator", icon: "shield-checkmark", color: "#6366F1", desc: "Full system access" },
   { id: "doctor" as const, label: "Doctor", icon: "medical", color: "#EF4444", desc: "Patient care & orders" },
   { id: "nurse" as const, label: "Nurse", icon: "heart", color: "#EC4899", desc: "Vitals & medication admin" },
@@ -19,7 +28,7 @@ const ROLES = [
 export default function LoginScreen() {
   const { colors: c } = useTheme();
   const { signIn, isLoading } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<ROLES[0]["id"]>("doctor");
+  const [selectedRole, setSelectedRole] = useState<RoleId>("doctor");
   const [hospital, setHospital] = useState(ROLE_HOSPITALS.doctor[0]);
   const [userName, setUserName] = useState(DEFAULT_USERS.doctor);
   const [customName, setCustomName] = useState("");
@@ -129,13 +138,12 @@ export default function LoginScreen() {
           <Card style={styles.nameCard}>
             <View style={styles.nameInputWrap}>
               <Ionicons name="person" size={20} color={c.textSecondary} />
-              <input
+              <TextInput
                 style={styles.nameInput}
                 value={customName}
                 onChangeText={setCustomName}
                 placeholder={defaultUser}
                 placeholderTextColor={c.textMuted}
-                color={c.text}
                 autoCapitalize="words"
                 autoCorrect={false}
               />
@@ -151,7 +159,7 @@ export default function LoginScreen() {
             icon="log-in"
             fullWidth
             onPress={handleSignIn}
-            disabled={isLoading}
+            loading={isLoading}
             style={styles.signInBtn}
           />
           {isLoading && (

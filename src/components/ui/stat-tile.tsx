@@ -9,7 +9,7 @@ interface StatTileProps {
 }
 
 export function StatTile({ label, value, tone, style }: StatTileProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={[styles.container, style]}>

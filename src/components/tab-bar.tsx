@@ -23,7 +23,7 @@ function TabBarItem({
   active: boolean;
   onPress: () => void;
 }) {
-  const c = useTheme();
+  const { colors: c } = useTheme();
   const [outline, filled] = ICONS[name];
   return (
     <Pressable onPress={onPress} style={styles.item} hitSlop={6}>
@@ -53,7 +53,7 @@ export function FloatingTabBar({
   descriptors: any;
   navigation: any;
 }) {
-  const c = useTheme();
+  const { colors: c } = useTheme();
   return (
     <View style={styles.shell} pointerEvents="box-none">
       <GlassView glassEffectStyle="regular" tintColor={c.cardElevated} style={styles.pill}>

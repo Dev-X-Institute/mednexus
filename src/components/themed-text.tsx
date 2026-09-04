@@ -9,7 +9,7 @@ export type ThemedTextProps = TextProps & {
 };
 
 export function ThemedText({ style, type = "default", themeColor, ...rest }: ThemedTextProps) {
-  const theme = useTheme();
+  const { colors: theme } = useTheme();
 
   return (
     <Text

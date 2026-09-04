@@ -11,7 +11,7 @@ interface CardProps {
 }
 
 export function Card({ variant = "default", style, children }: CardProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const backgrounds: Record<CardVariant, string> = {
     default: colors.card,

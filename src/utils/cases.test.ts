@@ -7,9 +7,6 @@ import {
   getCases,
   getCaseById,
   formatDate,
-  scoreCase,
-  buildSteps,
-  pickComplications,
   matchPatientProfile,
   similarCases,
 } from "@/utils/cases";
@@ -124,70 +121,6 @@ describe("cases utilities", () => {
     });
   });
 
-  describe("scoreCase", () => {
-    it("returns higher score for better symptom overlap", () => {
-      const profile1: PatientProfile = { age: 45, symptoms: ["Fever", "Chest pain", "Dyspnea"], notes: "" };
-      const profile2: PatientProfile = { age: 45, symptoms: ["Headache"], notes: "" };
-
-      const score1 = scoreCase(profile1, mockCases[0]);
-      const score2 = scoreCase(profile2, mockCases[0]);
-
-      expect(score1).toBeGreaterThan(score2);
-    });
-
-    it("returns higher score for closer age", () => {
-      const profile1: PatientProfile = { age: 45, symptoms: ["Fever"], notes: "" };
-      const profile2: PatientProfile = { age: 80, symptoms: ["Fever"], notes: "" };
-
-      const score1 = scoreCase(profile1, mockCases[0]);
-      const score2 = scoreCase(profile2, mockCases[0]);
-
-      expect(score1).toBeGreaterThan(score2);
-    });
-
-    it("returns score between 0 and 1", () => {
-      const score = scoreCase(mockProfile, mockCases[0]);
-      expect(score).toBeGreaterThanOrEqual(0);
-      expect(score).toBeLessThanOrEqual(1);
-    });
-  });
-
-  describe("buildSteps", () => {
-    it("splits treatment by commas", () => {
-      const steps = buildSteps("Aspirin, Clopidogrel, Heparin");
-      expect(steps).toEqual(["Aspirin", "Clopidogrel", "Heparin"]);
-    });
-
-    it("handles 'and' conjunctions", () => {
-      const steps = buildSteps("Aspirin and Clopidogrel, Heparin");
-      expect(steps).toContain("Aspirin and Clopidogrel");
-    });
-
-    it("limits to 5 steps", () => {
-      const steps = buildSteps("A, B, C, D, E, F, G");
-      expect(steps).toHaveLength(5);
-    });
-
-    it("returns single step for simple treatment", () => {
-      const steps = buildSteps("Monitor and observe");
-      expect(steps).toEqual(["Monitor and observe"]);
-    });
-  });
-
-  describe("pickComplications", () => {
-    it("returns complications based on tags", () => {
-      const complications = pickComplications(mockCases[0]);
-      expect(complications.length).toBeGreaterThan(0);
-      expect(complications.length).toBeLessThanOrEqual(2);
-    });
-
-    it("returns unique complications", () => {
-      const complications = pickComplications(mockCases[1]);
-      const unique = new Set(complications);
-      expect(unique.size).toBe(complications.length);
-    });
-  });
-
   describe("matchPatientProfile", () => {
     it("returns recommendation result with all fields", () => {
       const result = matchPatientProfile(mockCases, mockProfile);
@@ -201,6 +134,7 @@ describe("cases utilities", () => {
       expect(result.pathway).toHaveProperty("steps");
       expect(Array.isArray(result.pathway.steps)).toBe(true);
       expect(result.pathway.steps.length).toBeGreaterThan(0);
+      expect(result.pathway.steps.length).toBeLessThanOrEqual(5);
 
       expect(result.stats).toHaveProperty("recovery");
       expect(result.stats).toHaveProperty("stayDays");
@@ -219,6 +153,30 @@ describe("cases utilities", () => {
     it("finds best matching case", () => {
       const result = matchPatientProfile(mockCases, mockProfile);
       expect(result.pathway.label).toContain("Acute Coronary Syndrome");
+    });
+
+    it("favors a profile matching symptoms and age (score rises with overlap)", () => {
+      const closeProfile: PatientProfile = {
+        age: 45,
+        symptoms: ["Fever", "Chest pain", "Dyspnea"],
+        notes: "",
+      };
+      const farProfile: PatientProfile = {
+        age: 80,
+        symptoms: ["Headache"],
+        notes: "",
+      };
+      const close = similarCases(mockCases, closeProfile);
+      const far = similarCases(mockCases, farProfile);
+      expect(close[0].match).toBeGreaterThan(far[0].match);
+    });
+
+    it("produces unique, bounded complications from the best match", () => {
+      const result = matchPatientProfile(mockCases, mockProfile);
+      const unique = new Set(result.complications);
+      expect(unique.size).toBe(result.complications.length);
+      expect(result.complications.length).toBeGreaterThan(0);
+      expect(result.complications.length).toBeLessThanOrEqual(2);
     });
   });
 

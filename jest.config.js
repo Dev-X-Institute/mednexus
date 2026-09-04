@@ -1,12 +1,9 @@
 module.exports = {
   preset: "jest-expo",
   testEnvironment: "node",
-  transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
-  },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   testMatch: ["**/*.test.(ts|tsx)"],
-  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
     "!src/**/*.d.ts",

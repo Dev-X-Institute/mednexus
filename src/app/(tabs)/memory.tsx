@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area.context";
-import { Spacing } from "@/constants/theme";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Spacing, Colors } from "@/constants/theme";
 import { Card, SectionHeader, Chip, GradientButton, Badge } from "@/components/ui";
 import { matchPatientProfile, similarCases } from "@/utils/cases";
 import { useDemo } from "@/context/demo";
-import { useTheme } from "@/hooks/use-theme";
 import { useData } from "@/context/data";
 import {
   generateNarrative,
@@ -15,10 +14,11 @@ import {
   type ClaudeNarrative,
 } from "@/utils/claude";
 
+const c = Colors.light;
+
 const SYMPTOMS = ["Fever", "Chest pain", "Dyspnea", "Kidney injury", "Hypertension", "Hypotension", "Cough", "Abdominal pain", "Headache", "Fatigue", "Tachycardia", "Confusion"];
 
 export default function MemoryScreen() {
-  const { colors: c } = useTheme();
   const { pastCases } = useData();
   const scrollRef = useRef<ScrollView>(null);
   const [ageText, setAgeText] = useState("45");

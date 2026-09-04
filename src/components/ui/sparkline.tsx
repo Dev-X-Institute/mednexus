@@ -17,7 +17,7 @@ export function Sparkline({
   width = 100,
   style,
 }: SparklineProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   if (data.length === 0) {
     return null;

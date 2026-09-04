@@ -3,13 +3,14 @@
  */
 
 import { storageGet, storageSet } from "@/utils/storage";
-
-const PREFIX = "mednexus:";
+import { Platform } from "react-native";
 
 describe("storage utilities", () => {
   const originalLocalStorage = globalThis.localStorage;
+  const originalOS = Platform.OS;
 
   beforeEach(() => {
+    (Platform as { OS: string }).OS = "web";
     globalThis.localStorage = {
       getItem: jest.fn(),
       setItem: jest.fn(),
@@ -21,6 +22,7 @@ describe("storage utilities", () => {
   });
 
   afterEach(() => {
+    (Platform as { OS: string }).OS = originalOS;
     globalThis.localStorage = originalLocalStorage;
   });
 

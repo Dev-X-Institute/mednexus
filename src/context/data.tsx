@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { createDataService, type DataService } from "@/lib/api";
+import { createContext, useContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createDataService } from "@/lib/api";
 import { useDemo } from "@/context/demo";
 import type {
   DailyAdmissionData,
@@ -43,9 +43,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const service = useMemo(() => createDataService(mode === "live"), [mode]);
 
-  const loadAll = async () => {
-    setLoading(true);
-    setError(null);
+  const loadAll = useCallback(async () => {
     try {
       const [
         admissions,
@@ -66,6 +64,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         service.getPredictions(),
         service.getRecommendations(),
       ]);
+      setError(null);
       setData(admissions);
       setMedicineStock(medicineStock);
       setPastCases(pastCases);
@@ -79,11 +78,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [service]);
 
   useEffect(() => {
+    // All state updates happen after an `await` inside loadAll; this is the
+    // async data-fetch mount effect, not a synchronous cascading setState.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAll();
-  }, [mode]);
+  }, [loadAll]);
 
   const value = useMemo(
     () => ({
@@ -110,6 +112,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recommendations,
       loading,
       error,
+      loadAll,
     ]
   );
 

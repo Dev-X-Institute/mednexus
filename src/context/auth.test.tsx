@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react-native";
 import { AuthProvider, useAuth, useSession } from "@/context/auth";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

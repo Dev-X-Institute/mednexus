@@ -33,7 +33,7 @@ export function GradientButton({
   style,
   fullWidth = false,
 }: GradientButtonProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const content = loading ? (
     <ActivityIndicator

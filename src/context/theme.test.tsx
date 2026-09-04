@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react-native";
 import { ThemeProvider, useTheme } from "@/context/theme";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

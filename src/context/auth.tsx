@@ -1,5 +1,4 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { Alert } from "react-native";
 import type { Session, RoleId } from "@/utils/types";
 
 interface AuthContextValue extends SessionContextValue {
@@ -9,7 +8,7 @@ interface AuthContextValue extends SessionContextValue {
 
 interface SessionContextValue {
   session: Session | null;
-  signIn: (role: RoleId, hospital: string, userName: string) => void;
+  signIn: (role: RoleId, hospital: string, userName?: string) => void;
   signOut: () => void;
 }
 
@@ -35,7 +34,7 @@ const DEFAULT_USERS: Record<RoleId, string> = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const signIn = (role: RoleId, hospital: string, userName?: string) => {
     setSession({
@@ -46,10 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = () => {
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: () => setSession(null) },
-    ]);
+    setSession(null);
   };
 
   const value = useMemo(

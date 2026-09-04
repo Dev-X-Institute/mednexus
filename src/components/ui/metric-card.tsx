@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle, Pressable } fro
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Card } from "./card";
 import { StatusDot } from "./status-dot";
 import { Sparkline } from "./sparkline";
 
@@ -35,7 +34,7 @@ export function MetricCard({
   accessibilityLabel,
   onPress,
 }: MetricCardProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const deltaColor =
     deltaTone === "up"

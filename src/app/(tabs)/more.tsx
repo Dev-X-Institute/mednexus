@@ -2,15 +2,18 @@ import { useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Switch, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Spacing, Radii } from "@/constants/theme";
+import { Spacing, Radii, type ThemeColor } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useSession } from "@/context/auth";
 import { useDemo } from "@/context/demo";
 import { useAccessibility } from "@/context/accessibility";
-import { Card, SectionHeader, Badge, GradientButton, Chip } from "@/components/ui";
+import { Card, SectionHeader, Badge, GradientButton } from "@/components/ui";
 import type { RoleId } from "@/utils/types";
 
-const ROLE_CONFIG: Record<RoleId, { label: string; icon: string; color: string }> = {
+type GlyphName = keyof typeof Ionicons.glyphMap;
+type ThemeColors = Record<ThemeColor, string>;
+
+const ROLE_CONFIG: Record<RoleId, { label: string; icon: GlyphName; color: string }> = {
   admin: { label: "Administrator", icon: "shield-checkmark", color: "#6366F1" },
   doctor: { label: "Doctor", icon: "medical", color: "#EF4444" },
   nurse: { label: "Nurse", icon: "heart", color: "#EC4899" },
@@ -19,7 +22,7 @@ const ROLE_CONFIG: Record<RoleId, { label: string; icon: string; color: string }
   finance_officer: { label: "Finance Officer", icon: "cash", color: "#10B981" },
 };
 
-const DEPARTMENTS = [
+const DEPARTMENTS: { id: string; name: string; icon: GlyphName; color: string }[] = [
   { id: "emergency", name: "Emergency", icon: "people", color: "#EF4444" },
   { id: "icu", name: "ICU", icon: "pulse", color: "#10B981" },
   { id: "surgery", name: "Surgery", icon: "time", color: "#6366F1" },
@@ -128,7 +131,7 @@ export default function MoreScreen() {
           />
           <Divider color={c.border} />
           <SettingRow
-            icon="speed"
+            icon="accessibility"
             iconColor="#8B5CF6"
             title="Reduce Motion"
             subtitle={reduceMotion ? "Animations disabled" : "Animations enabled"}
@@ -194,7 +197,7 @@ export default function MoreScreen() {
               </Text>
             </Card>
           </>
-        }
+        )}
 
         {/* Role & Access */}
         <SectionHeader title="Role & Access" subtitle="Current permissions" style={styles.section} />
@@ -250,7 +253,7 @@ export default function MoreScreen() {
 
 function ThemeToggle() {
   const { mode, toggleTheme, colors } = useTheme();
-  const icons = { light: "sunny", dark: "moon", system: "settings" };
+  const icons: Record<string, GlyphName> = { light: "sunny", dark: "moon", system: "settings" };
   const labels = { light: "Light", dark: "Dark", system: "System" };
 
   return (
@@ -297,7 +300,7 @@ function SettingRow({
   accessory,
   onPress,
 }: {
-  icon: string;
+  icon: GlyphName;
   iconColor: string;
   title: string;
   subtitle: string;
@@ -330,7 +333,7 @@ function NotificationRow({
   subtitle: string;
   enabled: boolean;
   onToggle: () => void;
-  color: typeof color;
+  color: ThemeColors;
 }) {
   return (
     <Pressable onPress={onToggle} style={styles.notificationRow}>
@@ -354,10 +357,10 @@ function DeptChip({
   onPress,
   color,
 }: {
-  dept: { id: string; name: string; icon: string; color: string };
+  dept: { id: string; name: string; icon: GlyphName; color: string };
   selected: boolean;
   onPress: () => void;
-  color: typeof color;
+  color: ThemeColors;
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.deptChip, selected && styles.deptChipSelected, { borderColor: dept.color }]}>
@@ -376,7 +379,7 @@ function DeptChip({
   );
 }
 
-function AboutRow({ label, value, color }: { label: string; value: string; color: typeof color }) {
+function AboutRow({ label, value, color }: { label: string; value: string; color: ThemeColors }) {
   return (
     <View style={styles.aboutRow}>
       <Text style={[styles.aboutLabel, { color: color.textSecondary }]}>{label}</Text>

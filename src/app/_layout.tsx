@@ -6,18 +6,6 @@ import { DemoProvider } from "@/context/demo";
 import { DataProvider } from "@/context/data";
 import { AccessibilityProvider } from "@/context/accessibility";
 
-function RootStack() {
-  const { colors } = useTheme();
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-      }}
-    />
-  );
-}
-
 function AuthGate() {
   const { isAuthenticated, isLoading } = useAuth();
   const { colors } = useTheme();

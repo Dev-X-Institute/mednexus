@@ -19,7 +19,7 @@ export function ProgressBar({
   height = 8,
   style,
 }: ProgressBarProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const clamped = Math.max(0, Math.min(1, progress));
   const fillColor = color ?? colors.primary;

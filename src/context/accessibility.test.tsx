@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react-native";
 import { AccessibilityProvider, useAccessibility } from "@/context/accessibility";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

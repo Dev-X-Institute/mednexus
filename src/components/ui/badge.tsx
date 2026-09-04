@@ -13,7 +13,7 @@ interface BadgeProps {
 const ALPHA_SUFFIX = "2E";
 
 export function Badge({ label, tone = "default", style }: BadgeProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const toneColor =
     tone === "default"

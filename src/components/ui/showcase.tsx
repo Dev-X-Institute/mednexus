@@ -14,7 +14,7 @@ import { StatusDot } from "./status-dot";
 import { Card } from "./card";
 
 export function ShowcaseGallery() {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]}>

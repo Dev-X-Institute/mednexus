@@ -10,7 +10,7 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title, subtitle, right, style }: SectionHeaderProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={[styles.row, style]}>

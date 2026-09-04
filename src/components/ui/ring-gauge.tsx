@@ -41,7 +41,7 @@ export function RingGauge({
   animate = true,
   delay = 0,
 }: RingGaugeProps) {
-  const colors = useTheme();
+  const { colors } = useTheme();
   const { reduceMotion } = useAccessibility();
 
   const clamp = Math.max(0, Math.min(100, value));
@@ -58,7 +58,7 @@ export function RingGauge({
     } else {
       progress.value = target;
     }
-  }, [clamp, animate, delay, reduceMotion]);
+  }, [clamp, animate, delay, reduceMotion, progress]);
 
   const strokeColor =
     tone === "primary"

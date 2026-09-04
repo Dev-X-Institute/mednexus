@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react-native";
 import { DemoProvider, useDemo } from "@/context/demo";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

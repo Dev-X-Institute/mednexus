@@ -1,13 +1,14 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { Colors } from "@/constants/theme";
+import { Colors, type ThemeColor } from "@/constants/theme";
 import { useColorScheme } from "react-native";
 
 type ThemeMode = "light" | "dark" | "system";
+type ThemeColors = Record<ThemeColor, string>;
 
 interface ThemeContextValue {
   mode: ThemeMode;
   resolved: "light" | "dark";
-  colors: typeof Colors.light;
+  colors: ThemeColors;
   toggleTheme: () => void;
   setMode: (mode: ThemeMode) => void;
 }
@@ -18,8 +19,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>("system");
   const systemScheme = useColorScheme();
 
-  const resolved = useMemo(() => {
-    if (mode === "system") return systemScheme ?? "light";
+  const resolved = useMemo<"light" | "dark">(() => {
+    if (mode === "system") return systemScheme === "dark" ? "dark" : "light";
     return mode;
   }, [mode, systemScheme]);
 

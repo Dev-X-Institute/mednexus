@@ -3,10 +3,9 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensio
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Radii, Spacing } from "@/constants/theme";
+import { Radii, Spacing, Colors } from "@/constants/theme";
 import { useSession } from "@/context/auth";
 import { useDemo } from "@/context/demo";
-import { useTheme } from "@/hooks/use-theme";
 import { useData } from "@/context/data";
 import {
   Card,
@@ -21,11 +20,12 @@ import {
 } from "@/components/ui";
 import { capacityPercent, formatCapacity, trendDirection } from "@/utils/predictions";
 
+const c = Colors.light;
+
 export default function DashboardScreen() {
   const { session } = useSession();
-  const { colors: c } = useTheme();
   const { width } = useWindowDimensions();
-  const { admissions, bloodBank, staff, theatreSchedule, recommendations } = useData();
+  const { admissions, bloodBank, staff, theatreSchedule, recommendations: recommendationsData, predictions } = useData();
   const { mode } = useDemo();
   // Screen padding (16 × 2) + Card padding (16 × 2); divide the remaining
   // space between all three gauges to prevent horizontal overflow.
@@ -54,7 +54,7 @@ export default function DashboardScreen() {
 
   const availability = onDuty.slice(0, 5);
 
-  const [recommendations, setRecommendations] = useState(recommendations);
+  const [recommendations, setRecommendations] = useState(recommendationsData);
 
   const statusToneFor = (v: number) =>
     v >= 85 ? "critical" : v >= 60 ? "warning" : "success";
@@ -245,7 +245,7 @@ export default function DashboardScreen() {
               </View>
               <Text style={[styles.predictValue, { color: c.text }]}>{p.value}</Text>
               <Text style={[styles.predictRange, { color: c.textMuted }]}>
-                forecast {p.range}
+                forecast {p.period}
               </Text>
               <Text style={[styles.predictDelta, { color: c.textSecondary }]}>
                 {p.delta} · {p.over}
@@ -327,7 +327,7 @@ export default function DashboardScreen() {
           {theatreSchedule.map((s, i) => (
             <View
               key={s.id}
-              style={[styles.theatreRow, i < theatreData.slots.length - 1 && styles.theatreDivider]}
+              style={[styles.theatreRow, i < theatreSchedule.length - 1 && styles.theatreDivider]}
             >
               <View style={[styles.theatreTimeWrap, { borderColor: c.border }]}>
                 <Text style={[styles.theatreTime, { color: c.text }]}>{s.time}</Text>

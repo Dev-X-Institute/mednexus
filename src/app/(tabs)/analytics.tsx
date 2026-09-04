@@ -1,16 +1,17 @@
 import { useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Radii, Spacing } from "@/constants/theme";
+import { Colors, Radii, Spacing } from "@/constants/theme";
 import { Card, ProgressBar, SectionHeader } from "@/components/ui";
-import { useTheme } from "@/hooks/use-theme";
 import { useData } from "@/context/data";
+import type { DailyAdmissionData, MedicineStock } from "@/utils/types";
+
+const c = Colors.light;
 
 type Tab = "Flow" | "Quality" | "Resources";
 const TABS: Tab[] = ["Flow", "Quality", "Resources"];
 
 export default function AnalyticsScreen() {
-  const { colors: c } = useTheme();
   const { admissions, medicineStock } = useData();
   const [tab, setTab] = useState<Tab>("Flow");
   const total = useMemo(() => admissions.reduce((sum, day) => sum + day.admissions, 0), [admissions]);
@@ -21,7 +22,7 @@ export default function AnalyticsScreen() {
   </ScrollView></SafeAreaView>;
 }
 
-function Flow({ total, admissions }: { total: number; admissions: typeof admissions }) {
+function Flow({ total, admissions }: { total: number; admissions: DailyAdmissionData[] }) {
   const recentAdmissions = admissions.slice(-7).map((item) => item.admissions);
   const lastDay = admissions[admissions.length - 1];
   return <View style={styles.stack}>
@@ -38,7 +39,7 @@ function Quality() { return <View style={styles.stack}>
   <ChartCard title="Mortality trend" subtitle="Percent · trailing 6 months" values={[3.4, 3.0, 3.3, 2.7, 2.5, 2.3]} color={c.critical} labels={["Apr", "May", "Jun", "Jul", "Aug", "Sep"]} />
 </View>; }
 
-function Resources({ medicineStock }: { medicineStock: typeof medicineStock }) {
+function Resources({ medicineStock }: { medicineStock: MedicineStock[] }) {
   const medicines = medicineStock.slice().sort((a, b) => b.monthlyUsageHistory[2] - a.monthlyUsageHistory[2]).slice(0, 5);
   return <View style={styles.stack}>
     <Card style={styles.resourceCard}><SectionHeader title="Medication consumption" subtitle="Typical monthly dispensing volume" />{medicines.map((medicine) => <ProgressBar key={medicine.id} label={medicine.name} valueLabel={`${medicine.monthlyUsageHistory[2]}`} progress={Math.min(1, medicine.monthlyUsageHistory[2] / 850)} color={c.info} style={styles.bar} />)}</Card>
