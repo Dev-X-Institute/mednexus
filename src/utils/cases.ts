@@ -74,10 +74,10 @@ export interface RecommendationResult {
 }
 
 const SIMILAR_HOSPITALS = [
-  "St. Meridian General",
-  "Lakeside Regional",
-  "Central City",
-  "Harborview",
+  "Korle Bu Teaching Hospital · Accra",
+  "Komfo Anokye Teaching Hospital · Kumasi",
+  "Tamale Teaching Hospital · Tamale",
+  "Cape Coast Teaching Hospital · Cape Coast",
 ] as const;
 
 const COMPLICATIONS: Record<string, string[]> = {

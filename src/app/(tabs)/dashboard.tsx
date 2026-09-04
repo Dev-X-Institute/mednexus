@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors, Radii, Spacing } from "@/constants/theme";
 import { useSession } from "@/context/session";
+import { useDemo } from "@/context/demo";
 import {
   Card,
   SectionHeader,
@@ -22,9 +23,9 @@ import staffData from "@/data/staff.json";
 import theatreData from "@/data/theatreSchedule.json";
 import recommendationsData from "@/data/resourceRecommendations.json";
 import { capacityPercent, formatCapacity, trendDirection } from "@/utils/predictions";
-import { getPredictions, MODE_LABELS, type DemoMode } from "@/utils/predictions-source";
+import { getPredictions } from "@/utils/predictions-source";
 
-const c = Colors.dark;
+const c = Colors.light;
 
 export default function DashboardScreen() {
   const { session } = useSession();
@@ -37,7 +38,7 @@ export default function DashboardScreen() {
   const occupancySeries = daily.map((d) => d.occupancy);
   const erSeries = daily.map((d) => d.emergencyVisits);
 
-  const [mode, setMode] = useState<DemoMode>("demo");
+  const { mode } = useDemo();
   const predictions = getPredictions(mode, daily);
 
   const bloodReserve = useMemo(
@@ -76,10 +77,10 @@ export default function DashboardScreen() {
           <View style={styles.greetingBlock}>
             <Text style={[styles.greeting, { color: c.textSecondary }]}>Good evening,</Text>
             <Text style={[styles.userName, { color: c.text }]} numberOfLines={1}>
-              {session?.userName ?? "Daniel Chen"}
+              {session?.userName ?? "Dr. Ama Osei"}
             </Text>
             <Text style={[styles.hospital, { color: c.textMuted }]} numberOfLines={1}>
-              {session?.hospital ?? "St. Meridian General"}
+              {session?.hospital ?? "Korle Bu Teaching Hospital"}
             </Text>
           </View>
           <View style={styles.headerRight}>
@@ -155,6 +156,7 @@ export default function DashboardScreen() {
         />
         <View style={styles.opsGrid}>
           <MetricCard
+            style={styles.opsCard}
             icon="bed-outline"
             label="Bed occupancy"
             value={`${formatCapacity(occupancyPct)}`}
@@ -164,6 +166,7 @@ export default function DashboardScreen() {
             spark={occupancySeries.slice(-9)}
           />
           <MetricCard
+            style={styles.opsCard}
             icon="pulse-outline"
             label="ER admissions"
             value={`${last.admissions}`}
@@ -175,15 +178,16 @@ export default function DashboardScreen() {
             spark={erSeries.slice(-9)}
           />
           <MetricCard
+            style={styles.opsCard}
             icon="people-outline"
             label="On duty"
             value={`${onDuty.length}`}
-            delta="across 5 depts"
+            delta={`${Object.keys(staffByDept).length} departments`}
             deltaTone="neutral"
             statusTone="success"
-            spark={occupancySeries.slice(-6)}
           />
           <MetricCard
+            style={styles.opsCard}
             icon="medical-outline"
             label="Pharmacy alerts"
             value={`3`}
@@ -203,32 +207,10 @@ export default function DashboardScreen() {
               : "Confidence-scored forecasts"
           }
           right={
-            <View style={styles.modeToggle}>
-              {(["demo", "live"] as DemoMode[]).map((m) => (
-                <TouchableOpacity
-                  key={m}
-                  onPress={() => setMode(m)}
-                  style={[
-                    styles.modeBtn,
-                    mode === m && { backgroundColor: c.primary, borderColor: c.primary },
-                  ]}
-                >
-                  {mode === m ? (
-                    <Ionicons name="pulse" size={12} color="#0A0E1A" />
-                  ) : (
-                    <Ionicons name="pulse-outline" size={12} color={c.textSecondary} />
-                  )}
-                  <Text
-                    style={[
-                      styles.modeLabel,
-                      mode === m ? { color: "#0A0E1A" } : { color: c.textSecondary },
-                    ]}
-                  >
-                    {MODE_LABELS[m].label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Badge
+              label={mode === "live" ? "Live" : "Demo"}
+              tone={mode === "live" ? "info" : "default"}
+            />
           }
           style={styles.section}
         />
@@ -456,26 +438,8 @@ const styles = StyleSheet.create({
 
   section: { marginTop: Spacing.two },
 
-  modeToggle: {
-    flexDirection: "row",
-    gap: Spacing.one,
-    backgroundColor: c.card,
-    borderRadius: Radii.pill,
-    padding: 2,
-    borderWidth: 1,
-    borderColor: c.border,
-  },
-  modeBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.one,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: Radii.pill,
-  },
-  modeLabel: { fontSize: 11, fontWeight: "700" },
   opsGrid: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two, justifyContent: "space-between" },
-  opsCard: { flexBasis: "48%" },
+  opsCard: { width: "48%" },
 
   predictionRow: { gap: Spacing.two, paddingRight: Spacing.one },
   predictionCard: { width: 220, gap: Spacing.two },

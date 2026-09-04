@@ -48,6 +48,23 @@ function standardError(y: number[], regression: ReturnType<typeof linearRegressi
 }
 
 /**
+ * Coefficient of determination (R²): how well the regression line explains
+ * the variance in the series. 1 = perfect fit, 0 = no better than the mean.
+ */
+function rSquared(y: number[], regression: ReturnType<typeof linearRegression>): number {
+  const n = y.length;
+  if (n < 2) return 0;
+  const mean = y.reduce((a, b) => a + b, 0) / n;
+  let sse = 0;
+  let sst = 0;
+  for (let i = 0; i < n; i++) {
+    sse += (y[i] - regression.predict(i)) ** 2;
+    sst += (y[i] - mean) ** 2;
+  }
+  return sst === 0 ? 0 : 1 - sse / sst;
+}
+
+/**
  * Forecast a raw numeric series `stepsAhead` steps past its last point.
  * Produces a point estimate and a prediction interval (95% ~= 1.96 std err),
  * plus a confidence score that shrinks as noise grows and the horizon grows.
@@ -76,6 +93,7 @@ export function forecastSeries(
 
   const reg = linearRegression(raw);
   const se = standardError(raw, reg);
+  const r2 = rSquared(raw, reg);
   const targetX = n - 1 + stepsAhead;
   const point = reg.predict(targetX);
   const halfWidth = 1.96 * se * (1 + 1 / n + ((targetX - (n - 1) / 2) ** 2) / n);
@@ -87,12 +105,11 @@ export function forecastSeries(
   const clampedLower = clamp(point - halfWidth);
   const clampedUpper = clamp(point + halfWidth);
 
-  // Confidence: tight interval (low noise + short horizon) => high confidence.
-  const mean = raw.reduce((a, b) => a + b, 0) / n;
-  const spreadRaw = 2 * halfWidth;
-  const normalized = mean === 0 ? 1 : spreadRaw / Math.max(1, mean * 2);
-  const horizonPenalty = 1 / (1 + stepsAhead * 0.08);
-  const confidence = clampConfidence(1 - normalized * 0.6 * horizonPenalty);
+  // Confidence reflects how well the model fits (R²) and how far ahead we look.
+  // A tight, well-fit trend scores high; noisy short series score medium; a far
+  // horizon is discounted slightly.
+  const horizonPenalty = 1 / (1 + stepsAhead * 0.06);
+  const confidence = clampConfidence(0.45 + r2 * 0.5 * horizonPenalty);
 
   return {
     series: [...raw],
@@ -106,7 +123,7 @@ export function forecastSeries(
 }
 
 function clampConfidence(v: number): number {
-  return Math.max(0.45, Math.min(0.96, Math.round(v * 100) / 100));
+  return Math.max(0.5, Math.min(0.96, Math.round(v * 100) / 100));
 }
 
 /**

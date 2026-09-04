@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +18,7 @@ interface MetricCardProps {
   deltaTone?: DeltaTone;
   spark?: number[];
   statusTone?: StatusTone;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function MetricCard({
@@ -28,6 +29,7 @@ export function MetricCard({
   deltaTone = "neutral",
   spark,
   statusTone = "success",
+  style,
 }: MetricCardProps) {
   const colors = useTheme();
 
@@ -46,7 +48,7 @@ export function MetricCard({
       : colors.critical;
 
   return (
-    <Card>
+    <Card style={style}>
       <View style={styles.headerRow}>
         <View style={styles.iconLabel}>
           <StatusDot color={statusColor} />

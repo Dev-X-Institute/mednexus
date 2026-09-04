@@ -6,7 +6,7 @@
   "staff": [
     {
       "id": "STF-001",
-      "name": "Dr. Marcus Chen",
+      "name": "Dr. Kofi Mensah",
       "role": "Consultant",
       "department": "Cardiology",
       "shift": "morning",
@@ -16,7 +16,7 @@
     },
     {
       "id": "STF-002",
-      "name": "Dr. Priya Sharma",
+      "name": "Dr. Ama Osei",
       "role": "Resident",
       "department": "Cardiology",
       "shift": "morning",
@@ -26,7 +26,7 @@
     },
     {
       "id": "STF-003",
-      "name": "Nurse Elena Rossi",
+      "name": "Nurse Akosua Asante",
       "role": "Charge Nurse",
       "department": "ER",
       "shift": "morning",
@@ -36,7 +36,7 @@
     },
     {
       "id": "STF-004",
-      "name": "Dr. James Okafor",
+      "name": "Dr. Kwame Boateng",
       "role": "Consultant",
       "department": "ER",
       "shift": "morning",
@@ -46,7 +46,7 @@
     },
     {
       "id": "STF-005",
-      "name": "Nurse Aisha Bello",
+      "name": "Nurse Abena Owusu",
       "role": "Charge Nurse",
       "department": "ICU",
       "shift": "morning",
@@ -56,7 +56,7 @@
     },
     {
       "id": "STF-006",
-      "name": "Dr. Henrik Larsen",
+      "name": "Dr. Yaw Agyeman",
       "role": "Consultant",
       "department": "ICU",
       "shift": "morning",
@@ -66,7 +66,7 @@
     },
     {
       "id": "STF-007",
-      "name": "Pharmacist Sofia Duarte",
+      "name": "Pharmacist Efua Addo",
       "role": "Pharmacist",
       "department": "Pharmacy",
       "shift": "morning",
@@ -76,7 +76,7 @@
     },
     {
       "id": "STF-008",
-      "name": "Pharmacist Daniel Kim",
+      "name": "Pharmacist Kojo Antwi",
       "role": "Pharmacist",
       "department": "Pharmacy",
       "shift": "afternoon",
@@ -86,7 +86,7 @@
     },
     {
       "id": "STF-009",
-      "name": "Dr. Rachel Nguyen",
+      "name": "Dr. Nana Adjei",
       "role": "Consultant",
       "department": "Radiology",
       "shift": "morning",
@@ -96,7 +96,7 @@
     },
     {
       "id": "STF-010",
-      "name": "Tech Omar Haddad",
+      "name": "Tech Ibrahim Sule",
       "role": "Radiology Tech",
       "department": "Radiology",
       "shift": "night",
@@ -106,7 +106,7 @@
     },
     {
       "id": "STF-011",
-      "name": "Dr. Grace Mensah",
+      "name": "Dr. Esi Nyarko",
       "role": "Consultant",
       "department": "Surgery",
       "shift": "morning",
@@ -116,7 +116,7 @@
     },
     {
       "id": "STF-012",
-      "name": "Scrub Nurse Liam Foley",
+      "name": "Scrub Nurse Emmanuel Tetteh",
       "role": "Scrub Nurse",
       "department": "Surgery",
       "shift": "morning",
@@ -126,7 +126,7 @@
     },
     {
       "id": "STF-013",
-      "name": "Lab Supervisor Camila Reyes",
+      "name": "Lab Supervisor Mavis Asare",
       "role": "Lab Supervisor",
       "department": "Lab",
       "shift": "morning",
@@ -136,7 +136,7 @@
     },
     {
       "id": "STF-014",
-      "name": "Dr. Nathan Brooks",
+      "name": "Dr. Abdul Rahman",
       "role": "Resident",
       "department": "ICU",
       "shift": "night",

@@ -1,10 +1,17 @@
-import { useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing } from "@/constants/theme";
 import { Card, SectionHeader, Chip, GradientButton, Badge } from "@/components/ui";
 import { matchPatientProfile, similarCases } from "@/utils/cases";
+import { useDemo } from "@/context/demo";
+import {
+  generateNarrative,
+  claudeConfigured,
+  CLAUDE_LABEL,
+  type ClaudeNarrative,
+} from "@/utils/claude";
 
 const c = Colors.light;
 const SYMPTOMS = ["Fever", "Chest pain", "Dyspnea", "Kidney injury", "Hypertension", "Hypotension", "Cough", "Abdominal pain", "Headache", "Fatigue", "Tachycardia", "Confusion"];
@@ -14,11 +21,39 @@ export default function MemoryScreen() {
   const [selected, setSelected] = useState<string[]>(["Fever", "Hypertension"]);
   const [notes, setNotes] = useState("");
   const [searched, setSearched] = useState(false);
+  const [narrating, setNarrating] = useState(false);
+  const [narrative, setNarrative] = useState<ClaudeNarrative | null>(null);
+  const [aiFailed, setAiFailed] = useState(false);
+  const { mode } = useDemo();
   const profile = useMemo(() => ({ age, symptoms: selected, notes }), [age, selected, notes]);
   const result = useMemo(() => matchPatientProfile(profile), [profile]);
   const matches = useMemo(() => similarCases(profile), [profile]);
   const updateAge = (delta: number) => { setAge((value) => Math.max(1, Math.min(100, value + delta))); setSearched(false); };
   const toggle = (symptom: string) => { setSelected((items) => items.includes(symptom) ? items.filter((item) => item !== symptom) : [...items, symptom]); setSearched(false); };
+
+  const runSearch = async () => {
+    setSearched(true);
+    setNarrative(null);
+    setAiFailed(false);
+    if (mode !== "live") return;
+    setNarrating(true);
+    const out = await generateNarrative(profile, matchPatientProfile(profile));
+    setNarrating(false);
+    if (out) setNarrative(out);
+    else setAiFailed(true);
+  };
+
+  // When the universal switch flips to "live" while a search is already shown,
+  // fetch the real Claude narrative automatically. Demo/live rendering is gated
+  // at render time, so switching back to "demo" simply hides live data.
+  useEffect(() => {
+    if (mode === "live" && searched && !narrative && !narrating) {
+      // Intentional: refetch the live narrative when the global switch flips to live.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      runSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, searched]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -34,11 +69,56 @@ export default function MemoryScreen() {
           <View style={styles.chips}>{SYMPTOMS.map((symptom) => <Chip key={symptom} label={symptom} selected={selected.includes(symptom)} onPress={() => toggle(symptom)} />)}</View>
           <Text style={styles.label}>Clinical notes <Text style={styles.optional}>optional</Text></Text>
           <TextInput value={notes} onChangeText={(value) => { setNotes(value); setSearched(false); }} placeholder="Labs, imaging, history, or current concern…" placeholderTextColor={c.textMuted} multiline textAlignVertical="top" style={styles.notes} />
-          <GradientButton label="Search Knowledge Network" icon="search-outline" fullWidth onPress={() => setSearched(true)} />
+          <GradientButton label="Search Knowledge Network" icon="search-outline" fullWidth onPress={runSearch} />
         </Card>
         {searched ? <>
+          {mode === "live" && (narrating ? (
+            <Card style={styles.aiLoading}>
+              <ActivityIndicator color={c.primary} />
+              <Text style={styles.aiLoadingText}>Synthesizing clinical narrative with Claude…</Text>
+            </Card>
+          ) : narrative ? (
+            <Card style={styles.recommendation}>
+              <SectionHeader title="AI clinical narrative" right={<Badge label="Live · Anthropic" tone="info" />} />
+              <Text style={styles.summary}>{narrative.summary}</Text>
+              <Text style={styles.blockLabel}>Rationale</Text>
+              {narrative.rationale.map((step, index) => (
+                <View style={styles.step} key={`r-${index}`}>
+                  <View style={styles.stepNumber}><Text style={styles.stepNumberText}>{index + 1}</Text></View>
+                  <Text style={styles.stepText}>{step}</Text>
+                </View>
+              ))}
+              {narrative.risks.length > 0 && <Text style={styles.blockLabel}>Risks to monitor</Text>}
+              {narrative.risks.length > 0 && (
+                <View style={styles.complications}>{narrative.risks.map((item) => <Badge key={`risk-${item}`} label={item} tone="warning" />)}</View>
+              )}
+              {narrative.flags.length > 0 && <Text style={styles.blockLabel}>Red-flag cautions</Text>}
+              {narrative.flags.length > 0 && (
+                <View style={styles.complications}>{narrative.flags.map((item) => <Badge key={`flag-${item}`} label={item} tone="critical" />)}</View>
+              )}
+              <Text style={styles.sourceNote}>{CLAUDE_LABEL}</Text>
+            </Card>
+          ) : aiFailed ? (
+            <View style={styles.fallbackRow}>
+              <Ionicons name="cloud-offline-outline" size={16} color={c.textSecondary} />
+              <Text style={styles.fallbackText}>
+                {claudeConfigured()
+                  ? "Claude unreachable — showing local knowledge-network match."
+                  : "Running on local knowledge network (no API key configured)."}
+              </Text>
+            </View>
+          ) : null )}
           <Card style={styles.recommendation}>
-            <SectionHeader title="AI recommendation" subtitle="Decision support — verify against local protocols" />
+            <SectionHeader
+              title="AI recommendation"
+              subtitle="Decision support — verify against local protocols"
+              right={
+                <Badge
+                  label={mode === "live" ? "Knowledge network" : "Demo engine"}
+                  tone={mode === "live" ? "info" : "default"}
+                />
+              }
+            />
             <View style={styles.countRow}><Text style={styles.count}>{result.matchCount}</Text><Text style={styles.countCaption}>similar cases{`\n`}matched to this profile</Text></View>
             <View style={styles.divider} /><Text style={styles.pathway}>{result.pathway.label}</Text>
             {result.pathway.steps.map((step, index) => <View style={styles.step} key={`${step}-${index}`}><View style={styles.stepNumber}><Text style={styles.stepNumberText}>{index + 1}</Text></View><Text style={styles.stepText}>{step}</Text></View>)}
@@ -61,4 +141,5 @@ const styles = StyleSheet.create({
   form: { gap: Spacing.three }, label: { color: c.text, fontSize: 14, fontWeight: "700" }, hint: { color: c.textMuted, fontSize: 11, marginTop: 2 }, optional: { color: c.textMuted, fontWeight: "400" }, ageRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }, ageControl: { flexDirection: "row", alignItems: "center", gap: Spacing.one }, ageButton: { height: 36, minWidth: 36, paddingHorizontal: 0 }, ageValue: { color: c.primary, fontSize: 20, fontWeight: "700", minWidth: 48, textAlign: "center" }, chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two }, notes: { minHeight: 92, borderRadius: 12, backgroundColor: c.cardElevated, color: c.text, padding: Spacing.three, borderWidth: 1, borderColor: c.border, fontSize: 14 },
   recommendation: { gap: Spacing.three }, countRow: { flexDirection: "row", alignItems: "center", gap: Spacing.three }, count: { color: c.primary, fontSize: 50, fontWeight: "800" }, countCaption: { color: c.textSecondary, fontSize: 14, lineHeight: 20 }, divider: { height: 1, backgroundColor: c.border }, pathway: { color: c.text, fontSize: 17, fontWeight: "700" }, step: { flexDirection: "row", alignItems: "center", gap: Spacing.two }, stepNumber: { height: 26, width: 26, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: c.primaryDim }, stepNumberText: { color: c.text, fontSize: 12, fontWeight: "700" }, stepText: { color: c.text, flex: 1, fontSize: 14, lineHeight: 20 }, stats: { flexDirection: "row", gap: Spacing.two }, stat: { flex: 1, alignItems: "center", paddingVertical: Spacing.two, borderRadius: 12, backgroundColor: c.cardElevated }, statValue: { fontSize: 18, fontWeight: "800" }, statLabel: { color: c.textSecondary, fontSize: 10, marginTop: 3 }, complicationTitle: { color: c.warning, fontSize: 13, fontWeight: "700" }, complications: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.one },
   caseList: { gap: Spacing.two }, caseCard: { gap: Spacing.one }, hospital: { color: c.textSecondary, fontSize: 12 }, diagnosis: { color: c.text, fontSize: 16, fontWeight: "700" }, caseAge: { color: c.textMuted, fontSize: 12 }, caseFooter: { flexDirection: "row", justifyContent: "space-between", marginTop: Spacing.two }, match: { color: c.primary, fontSize: 12, fontWeight: "700" }, anonymized: { color: c.success, fontSize: 12, fontWeight: "600" },
+  aiLoading: { flexDirection: "row", alignItems: "center", gap: Spacing.two }, aiLoadingText: { color: c.textSecondary, fontSize: 13 }, summary: { color: c.text, fontSize: 15, lineHeight: 22 }, blockLabel: { color: c.textSecondary, fontSize: 12, fontWeight: "700", marginTop: Spacing.three, marginBottom: Spacing.two, textTransform: "uppercase", letterSpacing: 0.4 }, sourceNote: { color: c.textMuted, fontSize: 11, marginTop: Spacing.two }, fallbackRow: { flexDirection: "row", alignItems: "center", gap: Spacing.two }, fallbackText: { color: c.textSecondary, fontSize: 12, flex: 1 },
 });

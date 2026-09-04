@@ -27,9 +27,9 @@ const ROLES: { id: RoleId; label: string; icon: keyof typeof Ionicons.glyphMap }
 ];
 
 const HOSPITALS = [
-  { name: "St. Meridian General", loc: "Houston, TX" },
-  { name: "Lakeside Regional", loc: "Seattle, WA" },
-  { name: "Central City Med", loc: "Chicago, IL" },
+  { name: "Korle Bu Teaching Hospital", loc: "Accra, Ghana" },
+  { name: "Komfo Anokye Teaching Hospital", loc: "Kumasi, Ghana" },
+  { name: "Tamale Teaching Hospital", loc: "Tamale, Ghana" },
 ];
 
 export default function LoginScreen() {
@@ -42,7 +42,7 @@ export default function LoginScreen() {
   const [hospital, setHospital] = useState(HOSPITALS[0].name);
 
   const submit = () => {
-    signIn(role ?? "doctor", hospital, "Daniel Chen");
+    signIn(role ?? "doctor", hospital, "Dr. Ama Osei");
     router.replace("/(tabs)/dashboard");
   };
 
