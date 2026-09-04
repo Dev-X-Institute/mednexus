@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,6 +29,10 @@ const c = Colors.light;
 
 export default function DashboardScreen() {
   const { session } = useSession();
+  const { width } = useWindowDimensions();
+  // Screen padding (16 × 2) + Card padding (16 × 2); divide the remaining
+  // space between all three gauges to prevent horizontal overflow.
+  const gaugeSize = Math.min(112, Math.max(64, Math.floor((width - 64) / 3)));
 
   const daily = admissionsData.dailyData;
   const last = daily[daily.length - 1];
@@ -105,7 +109,7 @@ export default function DashboardScreen() {
           <View style={styles.gaugeRow}>
             <RingGauge
               value={occupancyPct}
-              size={112}
+              size={gaugeSize}
               strokeWidth={9}
               tone={statusToneFor(occupancyPct) as any}
               centerLabel={`${occupancyPct}%`}
@@ -113,7 +117,7 @@ export default function DashboardScreen() {
             />
             <RingGauge
               value={icuPct}
-              size={112}
+              size={gaugeSize}
               strokeWidth={9}
               tone={icuPct >= 75 ? ("warning" as any) : ("primary" as any)}
               centerLabel={`${icuPct}%`}
@@ -121,7 +125,7 @@ export default function DashboardScreen() {
             />
             <RingGauge
               value={100}
-              size={112}
+              size={gaugeSize}
               strokeWidth={9}
               tone="warning"
               centerLabel={`${last.emergencyVisits}`}
