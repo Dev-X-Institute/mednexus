@@ -8,7 +8,10 @@ interface AuthContextValue extends SessionContextValue {
 
 interface SessionContextValue {
   session: Session | null;
+  /** Staff sign-in — selects a clinical role and facility. */
   signIn: (role: RoleId, hospital: string, userName?: string) => void;
+  /** Patient sign-in — represents a Patient in the care store. */
+  signInPatient: (patientId: string, userName: string) => void;
   signOut: () => void;
 }
 
@@ -38,9 +41,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = (role: RoleId, hospital: string, userName?: string) => {
     setSession({
+      audience: "staff",
       role,
       hospital,
       userName: userName ?? DEFAULT_USERS[role],
+    });
+  };
+
+  const signInPatient = (patientId: string, userName: string) => {
+    setSession({
+      audience: "patient",
+      patientId,
+      userName,
     });
   };
 
@@ -52,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       session,
       signIn,
+      signInPatient,
       signOut,
       isAuthenticated: !!session,
       isLoading,
@@ -69,8 +82,8 @@ export function useAuth(): AuthContextValue {
 }
 
 export function useSession(): SessionContextValue {
-  const { session, signIn, signOut } = useAuth();
-  return { session, signIn, signOut };
+  const { session, signIn, signInPatient, signOut } = useAuth();
+  return { session, signIn, signInPatient, signOut };
 }
 
 export { ROLE_HOSPITALS, DEFAULT_USERS };

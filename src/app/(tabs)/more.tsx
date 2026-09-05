@@ -53,7 +53,7 @@ export default function MoreScreen() {
     useMemo(() => DEPARTMENTS.slice(0, 3).map((d) => d.id), [])
   );
 
-  const roleConfig = session ? ROLE_CONFIG[session.role] : ROLE_CONFIG.admin;
+  const roleConfig = ROLE_CONFIG[session?.role ?? "admin"];
   const isAdmin = session?.role === "admin";
 
   const toggleNotification = (id: string) => {

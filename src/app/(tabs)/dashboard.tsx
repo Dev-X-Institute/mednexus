@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, type Href } from "expo-router";
 
 import { Radii, Spacing, Colors } from "@/constants/theme";
 import { useSession } from "@/context/auth";
@@ -24,6 +25,7 @@ const c = Colors.light;
 
 export default function DashboardScreen() {
   const { session } = useSession();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const { admissions, bloodBank, staff, theatreSchedule, recommendations: recommendationsData, predictions } = useData();
   const { mode } = useDemo();
@@ -89,6 +91,34 @@ export default function DashboardScreen() {
               <View style={[styles.bellDot, { backgroundColor: c.critical }]} />
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Quick nav: shared care records */}
+        <View style={styles.navRow}>
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: c.card, borderColor: c.border }]}
+            onPress={() => router.push("/roster" as Href)}
+            accessibilityRole="button"
+            accessibilityLabel="Open My Patients"
+          >
+            <View style={[styles.navIcon, { backgroundColor: `${c.primary}20` }]}>
+              <Ionicons name="people" size={22} color={c.primary} />
+            </View>
+            <Text style={[styles.navTitle, { color: c.text }]}>My Patients</Text>
+            <Text style={[styles.navSub, { color: c.textSecondary }]}>Diagnoses & prescriptions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: c.card, borderColor: c.border }]}
+            onPress={() => router.push("/network" as Href)}
+            accessibilityRole="button"
+            accessibilityLabel="Open Hospital Network"
+          >
+            <View style={[styles.navIcon, { backgroundColor: `${c.accent}20` }]}>
+              <Ionicons name="git-network" size={22} color={c.accent} />
+            </View>
+            <Text style={[styles.navTitle, { color: c.text }]}>Hospital Network</Text>
+            <Text style={[styles.navSub, { color: c.textSecondary }]}>Live bed availability</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Ring gauge card: Beds / ICU / ER queue */}
@@ -432,6 +462,25 @@ const styles = StyleSheet.create({
 
   gaugeCard: { gap: Spacing.three },
   gaugeRow: { flexDirection: "row", justifyContent: "space-between" },
+
+  navRow: { flexDirection: "row", gap: Spacing.two },
+  navCard: {
+    flex: 1,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    padding: Spacing.three,
+    gap: Spacing.one,
+  },
+  navIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: Radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.one,
+  },
+  navTitle: { fontSize: 15, fontWeight: "700" },
+  navSub: { fontSize: 12 },
 
   bloodHeader: {
     flexDirection: "row",

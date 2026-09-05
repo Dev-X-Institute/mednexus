@@ -26,9 +26,25 @@ describe("AuthContext", () => {
 
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.session).toEqual({
+      audience: "staff",
       role: "doctor",
       hospital: "Korle Bu Teaching Hospital",
       userName: "Dr. Test",
+    });
+  });
+
+  it("signInPatient sets a patient-audience session", () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    act(() => {
+      result.current.signInPatient("p1", "Ama Boateng");
+    });
+
+    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.session).toEqual({
+      audience: "patient",
+      patientId: "p1",
+      userName: "Ama Boateng",
     });
   });
 

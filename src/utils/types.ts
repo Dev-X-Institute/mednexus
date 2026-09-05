@@ -18,10 +18,19 @@ export interface Role {
   icon: string;
 }
 
+/** Which of the two interfaces a signed-in session is using. */
+export type Audience = "staff" | "patient";
+
 export interface Session {
-  role: RoleId;
-  hospital: string;
+  /** "staff" (clinical roles) or "patient" (self-service companion). Defaults to staff. */
+  audience: Audience;
   userName: string;
+  /** Staff only — clinical role. */
+  role?: RoleId;
+  /** Staff only — facility. */
+  hospital?: string;
+  /** Patient only — which Patient in the care store this session represents. */
+  patientId?: string;
 }
 
 export interface DailyAdmissionData {
@@ -106,4 +115,75 @@ export interface Recommendation {
   savings: string;
   impact: "high" | "medium" | "low";
   applied: boolean;
+}
+
+/* ------------------------------------------------------------------ *
+ * Care store — patient-facing companion + doctor patient management.
+ * Shared live between the staff and patient interfaces (see care.tsx).
+ * ------------------------------------------------------------------ */
+
+export interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: "Male" | "Female" | "Other";
+  bloodGroup: string;
+  /** Drug/substance allergies — surfaced as flags when prescribing. */
+  allergies: string[];
+  /** Ongoing chronic conditions shown on the patient's health history. */
+  conditions: string[];
+}
+
+export interface Diagnosis {
+  id: string;
+  patientId: string;
+  condition: string;
+  notes: string;
+  /** ISO date (YYYY-MM-DD). */
+  date: string;
+  doctor: string;
+}
+
+export interface Prescription {
+  id: string;
+  patientId: string;
+  drug: string;
+  /** e.g. "500 mg". Kept as free text — never rendered as a dosing instruction. */
+  dosage: string;
+  /** Human-readable schedule, e.g. "Twice daily". */
+  frequency: string;
+  /** Doses expected per day — drives the daily checklist. */
+  timesPerDay: number;
+  /** ISO date (YYYY-MM-DD). */
+  startDate: string;
+  instructions?: string;
+  prescribedBy: string;
+}
+
+export interface MedicationLog {
+  id: string;
+  prescriptionId: string;
+  patientId: string;
+  /** ISO date (YYYY-MM-DD) the dose was due. */
+  date: string;
+  taken: boolean;
+  /** ISO timestamp when marked taken, if it was. */
+  takenAt?: string;
+}
+
+export type HospitalStatus = "Available" | "Limited" | "Full";
+
+export interface Hospital {
+  id: string;
+  name: string;
+  region: string;
+  address: string;
+  /** Mock straight-line distance in km. */
+  distanceKm: number;
+  availableBeds: number;
+  totalBeds: number;
+  /** Derived from the beds ratio — see deriveHospitalStatus in care.tsx. */
+  status: HospitalStatus;
+  services: string[];
+  phone: string;
 }
