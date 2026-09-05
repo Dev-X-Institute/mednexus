@@ -1,3 +1,5 @@
+import type { ClaudeTriageHints, TriageProfile } from "@/utils/triage-engine";
+import type { ProtocolId } from "@/utils/triage-protocols";
 import type { PatientProfile, RecommendationResult } from "@/utils/cases";
 
 /**
@@ -188,6 +190,96 @@ export async function generateNarrative(
       parsed.flags = flaggedCategories(profile.symptoms);
     }
     return parsed;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function buildTriageSystemPrompt(): string {
+  return [
+    "You are MedNexus AI, a careful patient-facing triage assistant.",
+    "You receive a patient's free-text symptom description and their de-identified profile.",
+    "Your job is to classify it into ONE of these protocols: 'headache', 'fever', or 'chest_pain'.",
+    "If the symptoms clearly suggest emergency-level danger (worst headache of life, chest pain radiating to arm/jaw/back, very high fever with stiff neck or confusion, trouble breathing), set 'urgent' to true.",
+    "Respond with STRICT JSON only — no markdown, no fences — shaped exactly like:",
+    '{"protocol": "headache" | "fever" | "chest_pain" | null, "urgent": boolean, "reasoning": string}',
+    "- protocol: null when the description is not recognisable as any of the three protocols.",
+    "- urgent: true only for genuine red-flag patterns that should not be delayed by questions.",
+    "- reasoning: one short sentence on why, grounded only in the provided text. Be conservative; never reassure in the reasoning.",
+  ].join("\n");
+}
+
+function parseTriageHints(text: string): ClaudeTriageHints | null {
+  const data = extractJson(text);
+  if (typeof data !== "object" || data === null) return null;
+  const obj = data as Record<string, unknown>;
+  const protocol = ["headache", "fever", "chest_pain"].includes(
+    String(obj.protocol || "")
+  )
+    ? (String(obj.protocol) as ProtocolId)
+    : null;
+  return {
+    protocol,
+    urgent: obj.urgent === true,
+    reasoning: typeof obj.reasoning === "string" ? obj.reasoning.trim() : "",
+  };
+}
+
+/**
+ * Ask Claude to interpret a patient's free-text symptoms into a triage
+ * protocol decision. Returns null (never throws) when no credential is
+ * configured or the request fails — the caller must then fall back to the
+ * deterministic `routeProtocol`/`isUrgentText` engine in triage-engine.
+ */
+export async function interpretTriageSymptoms(
+  text: string,
+  profile: TriageProfile
+): Promise<ClaudeTriageHints | null> {
+  if (!AUTH_TOKEN) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${BASE_URL}/v1/messages`, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": AUTH_TOKEN,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 400,
+        system: buildTriageSystemPrompt(),
+        messages: [
+          {
+            role: "user",
+            content: JSON.stringify({
+              symptoms_text: text,
+              patient_profile: {
+                age: profile.age,
+                gender: profile.gender || undefined,
+                conditions: profile.conditions || [],
+                allergies: profile.allergies || [],
+                medications: profile.medications || [],
+              },
+            }),
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const reply: string | undefined = data?.content?.[0]?.text;
+    if (!reply) return null;
+
+    return parseTriageHints(reply);
   } catch {
     return null;
   } finally {

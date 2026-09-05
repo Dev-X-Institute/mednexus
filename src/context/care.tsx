@@ -13,13 +13,21 @@ import type {
   MedicationLog,
   Hospital,
   HospitalStatus,
+  FamilyContact,
+  FamilyNotificationLog,
+  ReminderLog,
 } from "@/utils/types";
 import {
   SEED_PATIENTS,
   SEED_DIAGNOSES,
   SEED_PRESCRIPTIONS,
   SEED_HOSPITALS,
+  SEED_FAMILY_CONTACTS,
+  SEED_FAMILY_NOTIFICATION_LOGS,
+  SEED_REMINDER_LOGS,
 } from "@/data/care-seed";
+import { makeId } from "@/utils/id";
+import { scheduleMedicationReminders } from "@/utils/med-reminders";
 
 /* ----------------------------- date helpers ----------------------------- */
 
@@ -74,10 +82,6 @@ function seedMedicationLogs(prescriptions: Prescription[]): MedicationLog[] {
   return logs;
 }
 
-function makeId(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-}
-
 /* ------------------------------- context --------------------------------- */
 
 export interface TodayItem {
@@ -98,6 +102,9 @@ interface CareContextValue {
   prescriptions: Prescription[];
   medicationLogs: MedicationLog[];
   hospitals: Hospital[];
+  familyContacts: FamilyContact[];
+  familyNotificationLogs: FamilyNotificationLog[];
+  reminderLogs: ReminderLog[];
 
   // selectors
   getPatient: (patientId: string) => Patient | undefined;
@@ -105,6 +112,9 @@ interface CareContextValue {
   getPrescriptions: (patientId: string) => Prescription[];
   getTodayItems: (patientId: string) => TodayItem[];
   getAdherence: (patientId: string) => Adherence;
+  getFamilyContact: (patientId: string) => FamilyContact | undefined;
+  getFamilyNotificationLogs: (patientId: string) => FamilyNotificationLog[];
+  getReminderLogs: (patientId: string) => ReminderLog[];
 
   // mutations
   addDiagnosis: (input: {
@@ -119,6 +129,7 @@ interface CareContextValue {
     dosage: string;
     frequency: string;
     timesPerDay: number;
+    doseTimes: string[];
     instructions?: string;
     prescribedBy: string;
   }) => void;
@@ -140,6 +151,9 @@ export function CareProvider({ children }: { children: ReactNode }) {
       .map((h) => ({ ...h, status: deriveHospitalStatus(h.availableBeds, h.totalBeds) }))
       .sort((a, b) => a.distanceKm - b.distanceKm)
   );
+  const [familyContacts] = useState<FamilyContact[]>(SEED_FAMILY_CONTACTS);
+  const [familyNotificationLogs] = useState<FamilyNotificationLog[]>(SEED_FAMILY_NOTIFICATION_LOGS);
+  const [reminderLogs, setReminderLogs] = useState<ReminderLog[]>(SEED_REMINDER_LOGS);
 
   const getPatient = useCallback(
     (patientId: string) => patients.find((p) => p.id === patientId),
@@ -205,6 +219,24 @@ export function CareProvider({ children }: { children: ReactNode }) {
     [medicationLogs]
   );
 
+  const getFamilyContact = useCallback(
+    (patientId: string) => familyContacts.find((contact) => contact.patientId === patientId),
+    [familyContacts]
+  );
+
+  const getFamilyNotificationLogs = useCallback(
+    (patientId: string) => familyNotificationLogs.filter((entry) => entry.patientId === patientId),
+    [familyNotificationLogs]
+  );
+
+  const getReminderLogs = useCallback(
+    (patientId: string) =>
+      reminderLogs
+        .filter((entry) => entry.patientId === patientId)
+        .sort((a, b) => (a.scheduledAt < b.scheduledAt ? 1 : -1)),
+    [reminderLogs]
+  );
+
   const addDiagnosis = useCallback<CareContextValue["addDiagnosis"]>((input) => {
     setDiagnoses((prev) => [
       {
@@ -220,20 +252,27 @@ export function CareProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addPrescription = useCallback<CareContextValue["addPrescription"]>((input) => {
-    setPrescriptions((prev) => [
-      ...prev,
-      {
-        id: makeId("rx"),
-        patientId: input.patientId,
-        drug: input.drug,
-        dosage: input.dosage,
-        frequency: input.frequency,
-        timesPerDay: input.timesPerDay,
-        startDate: TODAY(),
-        instructions: input.instructions,
-        prescribedBy: input.prescribedBy,
-      },
-    ]);
+    const rx: Prescription = {
+      id: makeId("rx"),
+      patientId: input.patientId,
+      drug: input.drug,
+      dosage: input.dosage,
+      frequency: input.frequency,
+      timesPerDay: input.timesPerDay,
+      doseTimes: input.doseTimes,
+      startDate: TODAY(),
+      instructions: input.instructions,
+      prescribedBy: input.prescribedBy,
+    };
+    setPrescriptions((prev) => [...prev, rx]);
+    // Schedule the live device reminders (notifications + calendar). This is
+    // fire-and-forget: the store answers immediately and the demo ReminderLog
+    // entries appear once the native calls settle (or degrade to "unavailable").
+    scheduleMedicationReminders(rx).then((outcome) => {
+      if (outcome.logs.length > 0) {
+        setReminderLogs((prev) => [...outcome.logs, ...prev]);
+      }
+    });
   }, []);
 
   const toggleMedicationTaken = useCallback<CareContextValue["toggleMedicationTaken"]>(
@@ -297,11 +336,17 @@ export function CareProvider({ children }: { children: ReactNode }) {
       prescriptions,
       medicationLogs,
       hospitals,
+      familyContacts,
+      familyNotificationLogs,
+      reminderLogs,
       getPatient,
       getDiagnoses,
       getPrescriptions,
       getTodayItems,
       getAdherence,
+      getFamilyContact,
+      getFamilyNotificationLogs,
+      getReminderLogs,
       addDiagnosis,
       addPrescription,
       toggleMedicationTaken,
@@ -313,11 +358,17 @@ export function CareProvider({ children }: { children: ReactNode }) {
       prescriptions,
       medicationLogs,
       hospitals,
+      familyContacts,
+      familyNotificationLogs,
+      reminderLogs,
       getPatient,
       getDiagnoses,
       getPrescriptions,
       getTodayItems,
       getAdherence,
+      getFamilyContact,
+      getFamilyNotificationLogs,
+      getReminderLogs,
       addDiagnosis,
       addPrescription,
       toggleMedicationTaken,

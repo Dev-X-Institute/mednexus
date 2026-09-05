@@ -35,7 +35,28 @@
           "imageWidth": 76
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow MedNexus to use your location to find the nearest hospitals with open beds."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow MedNexus to add medication reminders to your calendar.",
+          "remindersPermission": "Allow MedNexus to add medication reminders to your calendar."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#38BDF8",
+          "defaultChannel": "med-reminders"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

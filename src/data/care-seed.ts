@@ -11,6 +11,9 @@ import type {
   Diagnosis,
   Prescription,
   Hospital,
+  FamilyContact,
+  FamilyNotificationLog,
+  ReminderLog,
 } from "@/utils/types";
 
 export const SEED_PATIENTS: Patient[] = [
@@ -69,6 +72,7 @@ export const SEED_PRESCRIPTIONS: Prescription[] = [
     dosage: "500 mg",
     frequency: "Twice daily",
     timesPerDay: 2,
+    doseTimes: ["08:00", "20:00"],
     startDate: "2025-11-10",
     instructions: "Take with meals.",
     prescribedBy: "Dr. Ama Osei",
@@ -80,6 +84,7 @@ export const SEED_PRESCRIPTIONS: Prescription[] = [
     dosage: "10 mg",
     frequency: "Once daily",
     timesPerDay: 1,
+    doseTimes: ["07:30"],
     startDate: "2026-02-03",
     instructions: "Take in the morning.",
     prescribedBy: "Dr. Ama Osei",
@@ -91,6 +96,7 @@ export const SEED_PRESCRIPTIONS: Prescription[] = [
     dosage: "200 mcg",
     frequency: "Once daily",
     timesPerDay: 1,
+    doseTimes: ["21:00"],
     startDate: "2026-01-15",
     instructions: "Rinse mouth after use.",
     prescribedBy: "Dr. Kwabena Owusu",
@@ -102,15 +108,63 @@ export const SEED_PRESCRIPTIONS: Prescription[] = [
     dosage: "10 mg",
     frequency: "Once daily",
     timesPerDay: 1,
+    doseTimes: ["08:00"],
     startDate: "2026-01-15",
     prescribedBy: "Dr. Kwabena Owusu",
   },
 ];
 
 /**
+ * App-scheduled reminder log — reflects what was scheduled when each seeded
+ * prescription was saved. Real entries append at runtime via the care store.
+ */
+export const SEED_REMINDER_LOGS: ReminderLog[] = [
+  {
+    id: "rl1",
+    patientId: "p1",
+    prescriptionId: "rx1",
+    title: "Metformin 500 mg",
+    detail: "Daily local notification scheduled for 08:00 and 20:00.",
+    channel: "Notification",
+    scheduledAt: "2026-06-09T08:00:00.000Z",
+  },
+  {
+    id: "rl2",
+    patientId: "p1",
+    prescriptionId: "rx2",
+    title: "Lisinopril 10 mg",
+    detail: "Daily local notification scheduled for 07:30.",
+    channel: "Notification",
+    scheduledAt: "2026-06-09T07:30:00.000Z",
+  },
+  {
+    id: "rl3",
+    patientId: "p2",
+    prescriptionId: "rx3",
+    title: "Budesonide Inhaler 200 mcg",
+    detail: "Daily local notification scheduled for 21:00.",
+    channel: "Notification",
+    scheduledAt: "2026-06-09T21:00:00.000Z",
+  },
+];
+
+/** Demo-only Family Circle contacts and notification history — no messages are sent. */
+export const SEED_FAMILY_CONTACTS: FamilyContact[] = [
+  { id: "fc1", patientId: "p1", name: "Akua Boateng", relationship: "Sister", phone: "+233 24 555 0142" },
+  { id: "fc2", patientId: "p2", name: "Adwoa Mensah", relationship: "Wife", phone: "+233 20 555 0189" },
+];
+
+export const SEED_FAMILY_NOTIFICATION_LOGS: FamilyNotificationLog[] = [
+  { id: "fn1", patientId: "p1", contactId: "fc1", message: "Notified Akua — missed evening dose", sentAt: "Tuesday" },
+  { id: "fn2", patientId: "p1", contactId: "fc1", message: "Shared 7-day adherence update", sentAt: "Last Friday" },
+  { id: "fn3", patientId: "p2", contactId: "fc2", message: "Notified Adwoa — check-in reminder", sentAt: "Monday" },
+];
+
+/**
  * NOTE: Hospital names/locations are real (sourced from Ghana's public
- * facility data). Bed/department availability numbers are simulated —
- * no public real-time bed data source exists in Ghana today.
+ * facility data). Coordinates are approximate facility positions for GPS
+ * distance. Bed/department availability numbers are simulated — no public
+ * real-time bed data source exists in Ghana today.
  * Seeded ascending-ish by distanceKm; status is re-derived by the store on load.
  */
 export const SEED_HOSPITALS: Hospital[] = [
@@ -119,6 +173,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "Greater Accra Regional Hospital (Ridge Hospital)",
     region: "Greater Accra",
     address: "Guggisberg Avenue, Accra",
+    latitude: 5.5573,
+    longitude: -0.1946,
     distanceKm: 2.8,
     availableBeds: 0,
     totalBeds: 75,
@@ -131,6 +187,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "Korle Bu Teaching Hospital",
     region: "Greater Accra",
     address: "Korle Bu Road, Accra",
+    latitude: 5.5389,
+    longitude: -0.2338,
     distanceKm: 4.1,
     availableBeds: 108,
     totalBeds: 450,
@@ -143,6 +201,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "LEKMA Hospital",
     region: "Greater Accra",
     address: "Ledzokuku-Krowor, Accra",
+    latitude: 5.5866,
+    longitude: -0.0885,
     distanceKm: 10.2,
     availableBeds: 19,
     totalBeds: 50,
@@ -155,6 +215,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "Cape Coast Teaching Hospital",
     region: "Central",
     address: "Cape Coast",
+    latitude: 5.1019,
+    longitude: -1.2489,
     distanceKm: 142,
     availableBeds: 17,
     totalBeds: 145,
@@ -167,6 +229,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "Komfo Anokye Teaching Hospital (KATH)",
     region: "Ashanti",
     address: "Okomfo Anokye Road, Kumasi",
+    latitude: 6.6946,
+    longitude: -1.6203,
     distanceKm: 255,
     availableBeds: 50,
     totalBeds: 205,
@@ -179,6 +243,8 @@ export const SEED_HOSPITALS: Hospital[] = [
     name: "Tamale Teaching Hospital",
     region: "Northern",
     address: "Tamale",
+    latitude: 9.3999,
+    longitude: -0.8387,
     distanceKm: 430,
     availableBeds: 48,
     totalBeds: 170,

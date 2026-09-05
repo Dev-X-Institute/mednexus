@@ -1,5 +1,7 @@
 export type Urgency = "self_care" | "see_doctor_soon" | "seek_care_now";
 
+export type ProtocolId = "headache" | "fever" | "chest_pain";
+
 export interface TriageResult {
   id: string;
   urgency: Urgency;
@@ -20,7 +22,7 @@ export interface TriageStep {
 }
 
 export interface TriageProtocol {
-  id: "headache" | "fever" | "chest_pain";
+  id: ProtocolId;
   name: string;
   icon: string;
   firstStepId: string;

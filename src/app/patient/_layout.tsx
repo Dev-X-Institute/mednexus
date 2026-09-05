@@ -1,25 +1,21 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
+import { PatientTabBar } from "@/components/patient-tab-bar";
 import { useTheme } from "@/hooks/use-theme";
 
 export default function PatientLayout() {
   const { colors } = useTheme();
 
   return (
-    <Stack
-      initialRouteName="home"
+    <Tabs
+      tabBar={(props) => <PatientTabBar {...props} />}
       screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.primary,
-        headerTitleStyle: { color: colors.text },
-        headerShadowVisible: false,
-        contentStyle: { backgroundColor: colors.background },
+        headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      {/* Patient home draws its own header (greeting + sign out). */}
-      <Stack.Screen name="home" options={{ headerShown: false }} />
-      <Stack.Screen name="hospitals" options={{ title: "Hospitals Near You" }} />
-      {/* triage.tsx is built by opencode; its route + header live here. */}
-      <Stack.Screen name="triage" options={{ title: "Check Your Symptoms" }} />
-    </Stack>
+      <Tabs.Screen name="home" options={{ title: "Home" }} />
+      <Tabs.Screen name="triage" options={{ title: "Symptoms" }} />
+      <Tabs.Screen name="hospitals" options={{ title: "Hospitals" }} />
+    </Tabs>
   );
 }

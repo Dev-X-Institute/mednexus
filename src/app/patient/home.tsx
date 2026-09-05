@@ -28,6 +28,8 @@ export default function PatientHomeScreen() {
     getAdherence,
     getDiagnoses,
     getPrescriptions,
+    getFamilyContact,
+    getFamilyNotificationLogs,
     toggleMedicationTaken,
   } = useCare();
 
@@ -37,6 +39,8 @@ export default function PatientHomeScreen() {
   const adherence = getAdherence(patientId);
   const diagnoses = getDiagnoses(patientId);
   const prescriptions = getPrescriptions(patientId);
+  const familyContact = getFamilyContact(patientId);
+  const familyNotifications = getFamilyNotificationLogs(patientId);
 
   const takenCount = todayItems.filter((i) => i.taken).length;
   const allDone = todayItems.length > 0 && takenCount === todayItems.length;
@@ -136,6 +140,38 @@ export default function PatientHomeScreen() {
           </Text>
         </Card>
 
+        {/* Family Circle — mock notification history for the demo only. */}
+        {familyContact && (
+          <Card style={styles.familyCard}>
+            <View style={styles.familyHeader}>
+              <View style={[styles.familyIcon, { backgroundColor: `${c.accent}18` }]}>
+                <Ionicons name="people-outline" size={21} color={c.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.familyTitle, { color: c.text }]}>Family Circle</Text>
+                <Text style={[styles.familyContact, { color: c.textSecondary }]}>
+                  {familyContact.name} · {familyContact.relationship}
+                </Text>
+              </View>
+              <Badge label="Demo" tone="default" />
+            </View>
+            <Text style={[styles.familyDescription, { color: c.textSecondary }]}>
+              Your trusted contact can receive care reminders when you choose to share them.
+            </Text>
+            <View style={[styles.familyLog, { borderTopColor: c.border }]}>
+              <Text style={[styles.familyLogTitle, { color: c.textMuted }]}>Notification history</Text>
+              {familyNotifications.slice(0, 3).map((entry) => (
+                <View key={entry.id} style={styles.familyLogRow}>
+                  <Ionicons name="checkmark-circle" size={15} color={c.success} />
+                  <Text style={[styles.familyLogText, { color: c.textSecondary }]}>{entry.message}</Text>
+                  <Text style={[styles.familyLogTime, { color: c.textMuted }]}>{entry.sentAt}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={[styles.familyNote, { color: c.textMuted }]}>No real notifications are sent in this demo.</Text>
+          </Card>
+        )}
+
         {/* Today's medications */}
         <SectionHeader
           title="Today's Medications"
@@ -190,6 +226,19 @@ export default function PatientHomeScreen() {
                     {item.prescription.frequency}
                     {item.prescription.instructions ? ` · ${item.prescription.instructions}` : ""}
                   </Text>
+                  {item.prescription.doseTimes.length > 0 && (
+                    <View style={styles.medTimes}>
+                      {item.prescription.doseTimes.map((t) => (
+                        <View
+                          key={t}
+                          style={[styles.timeChip, { backgroundColor: `${c.primary}1a`, borderColor: `${c.primary}44` }]}
+                        >
+                          <Ionicons name="alarm-outline" size={11} color={c.primary} />
+                          <Text style={[styles.timeChipText, { color: c.primary }]}>{t}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
               </Pressable>
             ))
@@ -197,7 +246,7 @@ export default function PatientHomeScreen() {
         </Card>
 
         {/* Quick actions */}
-        <SectionHeader title="Care Tools" style={styles.section} />
+        <SectionHeader title="Care Tools" style={styles.careToolsSection} />
         <View style={styles.actions}>
           <ActionCard
             icon="pulse-outline"
@@ -309,7 +358,7 @@ function ActionCard({
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.three },
+  content: { padding: Spacing.three, paddingBottom: 110, gap: Spacing.three },
   empty: { flex: 1, alignItems: "center", justifyContent: "center", gap: Spacing.two },
   signOutLink: { padding: Spacing.two },
 
@@ -342,8 +391,21 @@ const styles = StyleSheet.create({
   tipRow: { flexDirection: "row", gap: Spacing.two, alignItems: "flex-start" },
   tipText: { flex: 1, fontSize: 13, lineHeight: 18 },
   companionNote: { fontSize: 11, lineHeight: 16, marginTop: Spacing.three },
+  familyCard: { gap: Spacing.two },
+  familyHeader: { flexDirection: "row", alignItems: "center", gap: Spacing.two },
+  familyIcon: { width: 42, height: 42, borderRadius: Radii.md, alignItems: "center", justifyContent: "center" },
+  familyTitle: { fontSize: 16, fontWeight: "800" },
+  familyContact: { fontSize: 12, marginTop: 2 },
+  familyDescription: { fontSize: 13, lineHeight: 19 },
+  familyLog: { borderTopWidth: 1, paddingTop: Spacing.two, gap: Spacing.two },
+  familyLogTitle: { fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.4 },
+  familyLogRow: { flexDirection: "row", alignItems: "center", gap: Spacing.one },
+  familyLogText: { flex: 1, fontSize: 12 },
+  familyLogTime: { fontSize: 11 },
+  familyNote: { fontSize: 10 },
 
   section: { marginTop: Spacing.two },
+  careToolsSection: { marginTop: Spacing.four },
 
   medRow: {
     flexDirection: "row",
@@ -353,8 +415,19 @@ const styles = StyleSheet.create({
   },
   medName: { fontSize: 16, fontWeight: "600" },
   medMeta: { fontSize: 12, marginTop: 2 },
+  medTimes: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.one, marginTop: Spacing.one },
+  timeChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: Radii.pill,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  timeChipText: { fontSize: 11, fontWeight: "700" },
 
-  actions: { flexDirection: "row", gap: Spacing.two },
+  actions: { flexDirection: "row", gap: Spacing.three, marginTop: Spacing.one },
   actionCard: {
     flex: 1,
     borderRadius: Radii.lg,
@@ -368,10 +441,10 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Spacing.one,
+    marginBottom: Spacing.two,
   },
-  actionTitle: { fontSize: 15, fontWeight: "700" },
-  actionSub: { fontSize: 12 },
+  actionTitle: { fontSize: 15, fontWeight: "700", lineHeight: 20 },
+  actionSub: { fontSize: 12, marginTop: Spacing.one },
 
   tagBlock: { gap: Spacing.one },
   tagLabel: { fontSize: 12, fontWeight: "600" },

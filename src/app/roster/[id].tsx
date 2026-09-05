@@ -19,12 +19,22 @@ import { useSession } from "@/context/auth";
 import { useCare } from "@/context/care";
 import { Card, SectionHeader, Badge, GradientButton, Chip } from "@/components/ui";
 
-const FREQUENCIES: { label: string; timesPerDay: number }[] = [
-  { label: "Once daily", timesPerDay: 1 },
-  { label: "Twice daily", timesPerDay: 2 },
-  { label: "Three times daily", timesPerDay: 3 },
-  { label: "As needed", timesPerDay: 1 },
+const FREQUENCIES: { label: string; timesPerDay: number; defaultTimes: string[] }[] = [
+  { label: "Once daily", timesPerDay: 1, defaultTimes: ["08:00"] },
+  { label: "Twice daily", timesPerDay: 2, defaultTimes: ["08:00", "20:00"] },
+  { label: "Three times daily", timesPerDay: 3, defaultTimes: ["08:00", "14:00", "20:00"] },
+  { label: "As needed", timesPerDay: 1, defaultTimes: [] },
 ];
+
+/** Coerce a typed time into "HH:MM" (24h), falling back to a safe default. */
+function normalizeTime(raw: string, fallback: string): string {
+  const m = raw.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return fallback;
+  const hour = Number(m[1]);
+  const minute = Number(m[2]);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return fallback;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
 
 export default function PatientDetailScreen() {
   const { colors: c } = useTheme();
@@ -48,7 +58,17 @@ export default function PatientDetailScreen() {
   const [rxDrug, setRxDrug] = useState("");
   const [rxDosage, setRxDosage] = useState("");
   const [rxFreqIdx, setRxFreqIdx] = useState(0);
+  const [rxTimes, setRxTimes] = useState<string[]>(FREQUENCIES[0].defaultTimes);
   const [rxInstructions, setRxInstructions] = useState("");
+
+  const selectFrequency = (idx: number) => {
+    setRxFreqIdx(idx);
+    setRxTimes(FREQUENCIES[idx].defaultTimes);
+  };
+
+  const setDoseTime = (i: number, value: string) => {
+    setRxTimes((prev) => prev.map((t, j) => (j === i ? value : t)));
+  };
 
   if (!patient) {
     return (
@@ -77,18 +97,21 @@ export default function PatientDetailScreen() {
   const submitPrescription = () => {
     if (!rxDrug.trim() || !rxDosage.trim()) return;
     const freq = FREQUENCIES[rxFreqIdx];
+    const doseTimes = freq.defaultTimes.length > 0 ? rxTimes.map((t) => normalizeTime(t, "08:00")) : [];
     addPrescription({
       patientId,
       drug: rxDrug.trim(),
       dosage: rxDosage.trim(),
       frequency: freq.label,
       timesPerDay: freq.timesPerDay,
+      doseTimes,
       instructions: rxInstructions.trim() || undefined,
       prescribedBy: doctorName,
     });
     setRxDrug("");
     setRxDosage("");
     setRxFreqIdx(0);
+    setRxTimes(FREQUENCIES[0].defaultTimes);
     setRxInstructions("");
     setRxOpen(false);
   };
@@ -238,11 +261,36 @@ export default function PatientDetailScreen() {
                       key={f.label}
                       label={f.label}
                       selected={rxFreqIdx === i}
-                      onPress={() => setRxFreqIdx(i)}
+                      onPress={() => selectFrequency(i)}
                     />
                   ))}
                 </View>
               </View>
+              {rxTimes.length > 0 && (
+                <View>
+                  <Text style={[styles.fieldLabel, { color: c.textSecondary }]}>
+                    Dose times (24h) — a reminder and calendar event are set for each
+                  </Text>
+                  <View style={styles.timeRow}>
+                    {rxTimes.map((t, i) => (
+                      <TextInput
+                        key={i}
+                        style={[
+                          styles.timeInput,
+                          { color: c.text, backgroundColor: c.backgroundElement, borderColor: c.border },
+                        ]}
+                        value={t}
+                        onChangeText={(v) => setDoseTime(i, v)}
+                        placeholder="08:00"
+                        placeholderTextColor={c.textMuted}
+                        maxLength={5}
+                        autoCapitalize="none"
+                        keyboardType="numbers-and-punctuation"
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
               <Field
                 label="Instructions (optional)"
                 value={rxInstructions}
@@ -278,6 +326,14 @@ export default function PatientDetailScreen() {
                   </View>
                   {!!r.instructions && (
                     <Text style={[styles.rowNotes, { color: c.textSecondary }]}>{r.instructions}</Text>
+                  )}
+                  {r.doseTimes.length > 0 && (
+                    <View style={styles.rowTimes}>
+                      <Ionicons name="alarm-outline" size={13} color={c.textMuted} />
+                      <Text style={[styles.rowTimesText, { color: c.textMuted }]}>
+                        Reminders daily at {r.doseTimes.join(", ")}
+                      </Text>
+                    </View>
                   )}
                   <Text style={[styles.rowBy, { color: c.textMuted }]}>
                     {r.prescribedBy} · from {r.startDate}
@@ -367,11 +423,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   freqRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.one },
+  timeRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two, marginTop: Spacing.one },
+  timeInput: {
+    borderWidth: 1,
+    borderRadius: Radii.md,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.two,
+    fontSize: 15,
+    width: 88,
+    textAlign: "center",
+  },
 
   row: { paddingVertical: Spacing.two, gap: 3 },
   rowHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: Spacing.two },
   rowTitle: { fontSize: 15, fontWeight: "700", flex: 1 },
   rowDate: { fontSize: 12 },
   rowNotes: { fontSize: 13, lineHeight: 18 },
+  rowTimes: { flexDirection: "row", alignItems: "center", gap: Spacing.one, marginTop: 2 },
+  rowTimesText: { fontSize: 12 },
   rowBy: { fontSize: 12 },
 });

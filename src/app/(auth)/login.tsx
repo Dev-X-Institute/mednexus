@@ -6,7 +6,7 @@ import { Spacing, Radii } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth, ROLE_HOSPITALS, DEFAULT_USERS } from "@/context/auth";
 import { useCare } from "@/context/care";
-import { Card, GradientButton, SectionHeader, Badge } from "@/components/ui";
+import { Card, GradientButton, SectionHeader } from "@/components/ui";
 import type { RoleId, Audience } from "@/utils/types";
 
 type RoleOption = {
@@ -256,15 +256,6 @@ export default function LoginScreen() {
           {isLoading && (
             <Text style={[styles.loading, { color: c.textSecondary }]}>Signing in…</Text>
           )}
-
-          {/* Demo Notice */}
-          <View style={styles.demoNotice}>
-            <Ionicons name="information-circle" size={16} color={c.info} />
-            <Text style={[styles.demoText, { color: c.textSecondary }]}>
-              Demo mode — no real authentication. In production, this would connect to your
-              identity provider (Supabase Auth, Firebase Auth, etc.).
-            </Text>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -399,13 +390,5 @@ const styles = StyleSheet.create({
   signInBtn: { marginTop: Spacing.two },
   loading: { textAlign: "center", marginTop: Spacing.two },
 
-  demoNotice: {
-    flexDirection: "row",
-    gap: Spacing.two,
-    marginTop: Spacing.four,
-    padding: Spacing.three,
-    borderRadius: Radii.md,
-    backgroundColor: "#E8E8E8",
-  },
   demoText: { flex: 1, fontSize: 12, lineHeight: 18 },
 });

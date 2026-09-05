@@ -154,6 +154,9 @@ export interface Prescription {
   frequency: string;
   /** Doses expected per day — drives the daily checklist. */
   timesPerDay: number;
+  /** Local clock times (HH:MM, 24h) each dose is due — drives daily app
+   * reminders and device-calendar events. Omitted for "as needed" only. */
+  doseTimes: string[];
   /** ISO date (YYYY-MM-DD). */
   startDate: string;
   instructions?: string;
@@ -171,6 +174,44 @@ export interface MedicationLog {
   takenAt?: string;
 }
 
+/** A trusted person the patient has chosen to include in care reminders. Demo data only. */
+export interface FamilyContact {
+  id: string;
+  patientId: string;
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
+/** Mock audit entry; does not represent a real push notification. */
+export interface FamilyNotificationLog {
+  id: string;
+  patientId: string;
+  contactId: string;
+  message: string;
+  sentAt: string;
+}
+
+/**
+ * App-scheduled medication reminder. Records what was actually scheduled on
+ * the device (local notification + optional device-calendar event) when a
+ * prescription is saved, so the demo shows the reminder without waiting for
+ * the alarm.
+ */
+export interface ReminderLog {
+  id: string;
+  patientId: string;
+  prescriptionId: string;
+  /** e.g. "08:00 – Metformin 500 mg". */
+  title: string;
+  /** Human summary of what was scheduled. */
+  detail: string;
+  /** "Notification" | "Calendar" | "Device unavailable". */
+  channel: string;
+  /** ISO timestamp of when it was scheduled. */
+  scheduledAt: string;
+}
+
 export type HospitalStatus = "Available" | "Limited" | "Full";
 
 export interface Hospital {
@@ -178,6 +219,9 @@ export interface Hospital {
   name: string;
   region: string;
   address: string;
+  /** Approximate facility coordinates (WGS84) — used for GPS distance. */
+  latitude: number;
+  longitude: number;
   /** Mock straight-line distance in km. */
   distanceKm: number;
   availableBeds: number;
